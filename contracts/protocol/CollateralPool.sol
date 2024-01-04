@@ -1,34 +1,30 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import {CollateralizeLogic} from "../libraries/logic/CollateralizeLogic.sol";
-import {CollateralPoolStorage} from "./CollateralPoolStorage.sol";
+import {ICollateralPool} from "../interfaces/ICollateralPool.sol";
 import {ICollateralPoolAddressesProvider} from "../interfaces/ICollateralPoolAddressesProvider.sol";
-import {DataTypes} from "../libraries/types/DataTypes.sol";
 import {SToken} from "./SToken.sol";
 
-contract CollateralPool is CollateralPoolStorage, IERC721Receiver {
-    modifier nonReentrant() {
-        require(_notEntered, "re-entered");
-        _notEntered = false;
-        _;
-        _notEntered = true;
-    }
+import {CollateralizeLogic} from "../libraries/logic/CollateralizeLogic.sol";
+import {DataTypes} from "../libraries/types/DataTypes.sol";
+import {CollateralPoolStorage} from "./CollateralPoolStorage.sol";
 
-    function initialize(
-        ICollateralPoolAddressesProvider addressesProvider,
-        SToken sToken
-    ) external {
-        _addressesProvider = addressesProvider;
+contract CollateralPool is ICollateralPool, CollateralPoolStorage, IERC721Receiver {
+    function initialize(ICollateralPoolAddressesProvider provider,SToken sToken) external {
+        require(!_initialized, "Already initialized");
+        _addressesProvider = provider;
         _sToken = sToken;
+        _initialized = true;
+
+        emit Initialized(address(provider));
     }
 
-    function collateralize(address nftAsset, uint256 nftTokenId) external {
+    function collateralize(address nftAsset, uint256 nftTokenId) external override {
         CollateralizeLogic.executeCollateralize(
             _addressesProvider,
             _sToken,
             DataTypes.ExecuteCollateralizeParams({
-                collateralProvider: msg.sender,
+                initiator: msg.sender,
                 nftAsset: nftAsset,
                 nftTokenId: nftTokenId
             })

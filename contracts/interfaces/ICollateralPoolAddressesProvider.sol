@@ -6,5 +6,9 @@ interface ICollateralPoolAddressesProvider {
 
   function getAddress(bytes32 id) external view returns (address);
 
-  function getNFTOracle() external view returns (address);
+  function getNftOracle() external view returns (address);
+
+  function getCollateralPool() external view returns (address);
+
+  function getCollateralPoolLoan() external view returns (address);
 }
