@@ -33,7 +33,7 @@ contract DutchAuction {
         uint256 totalForAuction;
         uint256 totalBids;
         bool isAuctionActivated;
-        bool isAllRefund;
+        bool isAllRefunded;
     }
 
     struct Bids {
@@ -46,7 +46,7 @@ contract DutchAuction {
     constructor(SToken _sToken) {
         admin = msg.sender;
         sToken = _sToken;
-        auctionData[auctionIndex].isAllRefund = true;
+        auctionData[auctionIndex].isAllRefunded = true;
     }
 
     modifier nonReentrant() {
@@ -71,7 +71,7 @@ contract DutchAuction {
         uint256 _totalForAuction
     ) external onlyAdmin {
         require(!auctionData[auctionIndex].isAuctionActivated,"Auction still in progress");
-        require(auctionData[auctionIndex].isAllRefund,"Auction not refunded yet");
+        require(auctionData[auctionIndex].isAllRefunded,"Auction not refunded yet");
         auctionIndex++;
         auctionData[auctionIndex].startTime = _startTime; // Start time
         auctionData[auctionIndex].endTime = _endTime; // End time
@@ -145,7 +145,7 @@ contract DutchAuction {
 
         refundProgress = _refundProgress;
         if (refundProgress >= _totalBids) {
-            currentAuction.isAllRefund = true;
+            currentAuction.isAllRefunded = true;
             auctionData[auctionIndex] = currentAuction;
         }
     }
