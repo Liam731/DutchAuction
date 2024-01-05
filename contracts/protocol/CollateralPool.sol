@@ -11,7 +11,16 @@ import {DataTypes} from "../libraries/types/DataTypes.sol";
 import {CollateralPoolStorage} from "./CollateralPoolStorage.sol";
 
 contract CollateralPool is ICollateralPool, CollateralPoolStorage, IERC721Receiver {
-    function initialize(ICollateralPoolAddressesProvider provider,SToken sToken) external {
+    constructor(){
+        _admin = msg.sender;
+    }
+
+    modifier onlyAdmin(){
+        require(_admin == msg.sender, "Only admin can call this function");
+        _;
+    }
+
+    function initialize(ICollateralPoolAddressesProvider provider,SToken sToken) external onlyAdmin {
         require(!_initialized, "Already initialized");
         _addressesProvider = provider;
         _sToken = sToken;
@@ -43,6 +52,17 @@ contract CollateralPool is ICollateralPool, CollateralPoolStorage, IERC721Receiv
                     nftTokenId: nftTokenId
                 })
             );
+    }
+    function addToWhitelist(address actionAddress) external onlyAdmin {
+        whitelist[actionAddress] = true;
+    }
+
+    function removeFromWhitelist(address actionAddress) external onlyAdmin {
+        whitelist[actionAddress] = false;
+    }
+
+    function isWhitelisted(address actionAddress) external view returns (bool) {
+        return whitelist[actionAddress];
     }
 
     function onERC721Received(
