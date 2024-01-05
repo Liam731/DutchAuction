@@ -9,4 +9,6 @@ interface ICollateralPool {
   event Initialized(address indexed pool);
   
   function collateralize(address nftAsset, uint256 nftTokenId) external;
+
+  function redeem(address nftAsset, uint256 nftTokenId) external payable returns (uint256);
 }

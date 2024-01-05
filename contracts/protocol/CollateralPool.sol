@@ -6,6 +6,7 @@ import {ICollateralPoolAddressesProvider} from "../interfaces/ICollateralPoolAdd
 import {SToken} from "./SToken.sol";
 
 import {CollateralizeLogic} from "../libraries/logic/CollateralizeLogic.sol";
+import {LiquidateLogic} from "../libraries/logic/LiquidateLogic.sol";
 import {DataTypes} from "../libraries/types/DataTypes.sol";
 import {CollateralPoolStorage} from "./CollateralPoolStorage.sol";
 
@@ -29,6 +30,19 @@ contract CollateralPool is ICollateralPool, CollateralPoolStorage, IERC721Receiv
                 nftTokenId: nftTokenId
             })
         );
+    }
+
+    function redeem(address nftAsset, uint256 nftTokenId) external payable override returns(uint256) {
+        return
+            LiquidateLogic.executeRedeem(
+                _addressesProvider,
+                _sToken,
+                DataTypes.ExecuteRedeemParams({
+                    initiator: msg.sender,
+                    nftAsset: nftAsset,
+                    nftTokenId: nftTokenId
+                })
+            );
     }
 
     function onERC721Received(

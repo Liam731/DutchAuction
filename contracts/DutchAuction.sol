@@ -180,7 +180,7 @@ contract DutchAuction {
             currentAuction.isAuctionActivated = false;
         }
         require(currentAuction.isAuctionActivated, "Auction not activated");
-        require(block.timestamp > currentAuction.startTime,"Auction not started");
+        require(block.timestamp >= currentAuction.startTime,"Auction not started");
         require(currentAuction.totalBids < currentAuction.totalForAuction,"Auction is full");
         require(sToken.balanceOf(msg.sender) >= bidPrice,"Insuficient token balance");
         require(bidPrice >= getAuctionPrice(), "Bid price not high enough");

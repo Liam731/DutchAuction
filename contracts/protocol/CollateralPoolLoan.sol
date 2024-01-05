@@ -25,7 +25,7 @@ contract CollateralPoolLoan is ICollateralPoolLoan {
         emit Initialized(address(provider));
     }
 
-    function createLoan(address initiator, address nftAsset, uint256 nftTokenId) external onlyCollateralPool returns(uint256){
+    function createLoan(address initiator, address nftAsset, uint256 nftTokenId, uint256 rewardAmount) external onlyCollateralPool returns(uint256){
         _loanId++;
         _nftToLoanIds[nftAsset][nftTokenId] = _loanId;
         // Save Info
@@ -33,8 +33,9 @@ contract CollateralPoolLoan is ICollateralPoolLoan {
         loanData.initiator = initiator;
         loanData.nftAsset = nftAsset;
         loanData.nftTokenId = nftTokenId;
+        loanData.rewardAmount = rewardAmount;
 
-        emit LoanCreated(initiator, _loanId, nftAsset, nftTokenId);
+        emit LoanCreated(initiator, _loanId, nftAsset, nftTokenId, rewardAmount);
 
         return _loanId;
     }

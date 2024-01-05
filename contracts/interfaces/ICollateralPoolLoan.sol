@@ -13,9 +13,9 @@ interface ICollateralPoolLoan {
      * @dev Emitted when a loan is created
      * @param user The address initiating the action
      */
-    event LoanCreated(address indexed user, uint256 indexed loanId, address nftAsset, uint256 nftTokenId);
+    event LoanCreated(address indexed user, uint256 indexed loanId, address nftAsset, uint256 nftTokenId, uint256 rewardAmount);
     
-    function createLoan(address initiator, address nftAsset, uint256 nftTokenId) external returns(uint256);
+    function createLoan(address initiator, address nftAsset, uint256 nftTokenId, uint256 rewardAmount) external returns(uint256);
 
     function getCollateralLoanId(address nftAsset, uint256 nftTokenId) external view returns(uint256);
 

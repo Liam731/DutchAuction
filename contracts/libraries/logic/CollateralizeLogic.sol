@@ -14,7 +14,7 @@ library CollateralizeLogic {
 
     struct ExecuteCollateralizeLocalVars {
         address initiator;
-        uint256 coinAmount;
+        uint256 rewardAmount;
         address nftOracle;
         uint256 loanId;
         address loanAddress;
@@ -50,20 +50,22 @@ library CollateralizeLogic {
         vars.loanId = ICollateralPoolLoan(vars.loanAddress).getCollateralLoanId(params.nftAsset, params.nftTokenId);
         require(vars.loanId == 0, "Nft already collateralized");
 
-        vars.loanId = ICollateralPoolLoan(vars.loanAddress).createLoan(vars.initiator, params.nftAsset, params.nftTokenId);
-        // Transfer NFT
-        IERC721(params.nftAsset).safeTransferFrom(vars.initiator,address(this),params.nftTokenId);
         vars.nftOracle = addressesProvider.getNftOracle();
         int nftPrice = NFTOracle(vars.nftOracle).getLatestPrice();
         //collateral factor = 60%
-        vars.coinAmount = (uint256(nftPrice) * 6) / 10;
-        sToken.mint(vars.initiator, vars.coinAmount);
+        vars.rewardAmount = (uint256(nftPrice) * 6) / 10;
+
+        vars.loanId = ICollateralPoolLoan(vars.loanAddress).createLoan(vars.initiator, params.nftAsset, params.nftTokenId, vars.rewardAmount);
+        // Transfer NFT
+        IERC721(params.nftAsset).safeTransferFrom(vars.initiator,address(this),params.nftTokenId);
+
+        sToken.mint(vars.initiator, vars.rewardAmount);
 
         emit Collateralize(
             vars.initiator,
             params.nftAsset,
             params.nftTokenId,
-            vars.coinAmount,
+            vars.rewardAmount,
             vars.loanId
         );
     }
