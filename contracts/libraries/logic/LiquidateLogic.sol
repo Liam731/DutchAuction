@@ -42,7 +42,7 @@ library LiquidateLogic {
 
         vars.repayAmount = loanData.rewardAmount;
         uint256 initiatorBalance = sToken.balanceOf(vars.initiator);
-        require(initiatorBalance + msg.value >= vars.repayAmount, "Not enough balance");
+        require(initiatorBalance + msg.value >= vars.repayAmount, "Not enough balance for redeem");
         if(initiatorBalance >= vars.repayAmount) {
             sToken.transferFrom(vars.initiator, address(this), vars.repayAmount);
         } else {

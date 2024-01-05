@@ -2,13 +2,11 @@
 pragma solidity ^0.8.19;
 
 interface ICollateralPool {
-    /**
-   * @dev Emitted on initialization to share location of dependent notes
-   * @param pool The address of the associated Collateral pool
-   */
-  event Initialized(address indexed pool);
+  event Initialized(address indexed provider, address indexed sToken);
   
   function collateralize(address nftAsset, uint256 nftTokenId) external;
 
   function redeem(address nftAsset, uint256 nftTokenId) external payable returns (uint256);
+
+  function swapExactTokensForETH(uint256 amountIn) external;
 }

@@ -46,7 +46,7 @@ contract GeneralSetUp is Test {
         addressesProvider.setAddress(COLLATERAL_POOL,address(collateralPool));
         addressesProvider.setAddress(COLLATERAL_POOL_LOAN,address(collateralPoolLoan));
         // Depoly PunkWarriorErc721 with DutchAuction
-        erc721 = new PunkWarriorErc721(sToken);
+        erc721 = new PunkWarriorErc721();
         erc721.setBaseURI("ipfs://QmfE1NWNVKtz7KaP2Ussz8xWcds6objCTekK6evn413eXh/1.json");
         vm.stopPrank();
     }
