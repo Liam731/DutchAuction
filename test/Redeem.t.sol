@@ -4,7 +4,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {GeneralSetUp} from "./helper/GeneralSetUp.sol";
 import {console} from "forge-std/console.sol";
 
-contract SimpDutchAuction is GeneralSetUp {
+contract RedeemTest is GeneralSetUp {
     function setUp() public override {
         super.setUp();
     }

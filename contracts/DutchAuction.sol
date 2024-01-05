@@ -4,6 +4,8 @@ pragma solidity ^0.8.19;
 import {console} from "forge-std/console.sol";
 import {SToken} from "./protocol/SToken.sol";
 import {IDutchAuctionManager} from "./interfaces/IDutchAuctionManager.sol";
+import {ICollateralPool} from "./interfaces/ICollateralPool.sol";
+import {ICollateralPoolAddressesProvider} from "./interfaces/ICollateralPoolAddressesProvider.sol";
 
 contract DutchAuction {
     uint256 public auctionIndex; // Which auction round
@@ -13,7 +15,9 @@ contract DutchAuction {
     mapping(uint256 => Auctions) public auctionData;
     mapping(uint256 => mapping(uint256 => Bids)) public allBids;
     bool public _notEntered;
-    SToken internal sToken;
+    bool internal _initialized;
+    SToken internal _sToken;
+    ICollateralPoolAddressesProvider internal _addressesProvider;
 
     event Bid(
         address indexed bidder,
@@ -43,10 +47,8 @@ contract DutchAuction {
         uint256 finalProcess; //0: No bid placed , 1: Bid placed, 2: Auction item claimed and sToken refunded
     }
 
-    constructor(SToken _sToken) {
+    constructor() {
         admin = msg.sender;
-        sToken = _sToken;
-        auctionData[auctionIndex].isAllRefunded = true;
     }
 
     modifier nonReentrant() {
@@ -57,8 +59,16 @@ contract DutchAuction {
     }
 
     modifier onlyAdmin() {
-        require(msg.sender == admin, "Only owner can call this function.");
+        require(msg.sender == admin, "Only admin can call this function.");
         _;
+    }
+
+    function initialize(ICollateralPoolAddressesProvider provider,SToken sToken) external onlyAdmin {
+        require(!_initialized, "Already initialized");
+        _addressesProvider = provider;
+        _sToken = sToken;
+        auctionData[auctionIndex].isAllRefunded = true;
+        _initialized = true;
     }
 
     function setAuction(
@@ -91,7 +101,7 @@ contract DutchAuction {
 
         _bidAllowed(bidPrice, currentbids, currentAuction);
 
-        sToken.transferFrom(msg.sender, address(this), bidPrice);
+        _sToken.transferFrom(msg.sender, address(this), bidPrice);
         currentbids.bidder = msg.sender;
         currentbids.itemIndex = currentAuction.totalBids;
         currentbids.bidPrice = bidPrice;
@@ -134,7 +144,7 @@ contract DutchAuction {
             );
             uint256 refund = currentbids.bidPrice - lastPrice;
             if (refund > 0) {
-                sToken.transfer(currentbids.bidder, refund);
+                _sToken.transfer(currentbids.bidder, refund);
             }
             currentbids.finalProcess = 2;
             allBids[auctionIndex][i] = currentbids;
@@ -150,12 +160,22 @@ contract DutchAuction {
         }
     }
 
+    function withdraw(uint256 amount, address to) external onlyAdmin {
+        require(!auctionData[auctionIndex].isAuctionActivated,"Auction still in progress");
+        address collateralPool = _addressesProvider.getAddress("COLLATERAL_POOL");
+        ICollateralPool(collateralPool).swapExactTokensForETH(amount);
+        (bool success, ) = to.call{value: amount}("");
+        require(success, "Transfer ETH failed");
+    }
+
     function getPersonalBidData(
         uint256 _auctionIndex,
         uint256 _itemIndex
     ) external view returns (Bids memory) {
         return allBids[_auctionIndex][_itemIndex];
     }
+
+    receive() external payable {}
 
     function getAuctionPrice() public view returns (uint256) {
         Auctions memory currentAuction = auctionData[auctionIndex];
@@ -182,7 +202,7 @@ contract DutchAuction {
         require(currentAuction.isAuctionActivated, "Auction not activated");
         require(block.timestamp >= currentAuction.startTime,"Auction not started");
         require(currentAuction.totalBids < currentAuction.totalForAuction,"Auction is full");
-        require(sToken.balanceOf(msg.sender) >= bidPrice,"Insuficient token balance");
+        require(_sToken.balanceOf(msg.sender) >= bidPrice,"Insuficient token balance");
         require(bidPrice >= getAuctionPrice(), "Bid price not high enough");
         require(currentbids.finalProcess == 0, "Bid not placed");
     }

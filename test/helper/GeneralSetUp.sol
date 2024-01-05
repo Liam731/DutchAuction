@@ -36,6 +36,7 @@ contract GeneralSetUp is Test {
         addressesProvider = new CollateralPoolAddressesProvider();
         // Depoly collateral pool
         collateralPool = new CollateralPool();
+        vm.deal(address(collateralPool), 100 ether);
         sToken = new SToken(address(collateralPool));
         collateralPool.initialize(ICollateralPoolAddressesProvider(addressesProvider), sToken);
         // Deploy collateral pool loan
@@ -47,7 +48,10 @@ contract GeneralSetUp is Test {
         addressesProvider.setAddress(COLLATERAL_POOL_LOAN,address(collateralPoolLoan));
         // Depoly PunkWarriorErc721 with DutchAuction
         erc721 = new PunkWarriorErc721();
+        erc721.initialize(ICollateralPoolAddressesProvider(addressesProvider), sToken);
         erc721.setBaseURI("ipfs://QmfE1NWNVKtz7KaP2Ussz8xWcds6objCTekK6evn413eXh/1.json");
+        // Punk warrior set as whitelist
+        collateralPool.addToWhitelist(address(erc721));
         vm.stopPrank();
     }
 

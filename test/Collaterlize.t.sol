@@ -6,8 +6,7 @@ import {console} from "forge-std/console.sol";
 import {NFTOracle} from "../contracts/protocol/NFTOracle.sol";
 import {DataTypes} from "../contracts/libraries/types/DataTypes.sol";
 
-contract SimpDutchAuction is GeneralSetUp {
-
+contract CollaterlizeTest is GeneralSetUp {
     function setUp() public override {
         super.setUp();
     }
