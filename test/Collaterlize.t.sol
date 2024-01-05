@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {CollateralizeSetUp} from "./helper/CollaterlizeSetup.sol";
+import {GeneralSetUp} from "./helper/GeneralSetUp.sol";
 import {console} from "forge-std/console.sol";
 import {NFTOracle} from "../contracts/protocol/NFTOracle.sol";
 import {DataTypes} from "../contracts/libraries/types/DataTypes.sol";
 
-contract SimpDutchAuction is CollateralizeSetUp {
+contract SimpDutchAuction is GeneralSetUp {
 
     function setUp() public override {
         super.setUp();

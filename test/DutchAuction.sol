@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {GeneralSetUp} from "./helper/GeneralSetUp.sol";
+import {console} from "forge-std/console.sol";
+import {PunkWarriorErc721} from "../contracts/PunkWarriorErc721.sol";
+import {NFTOracle} from "../contracts/protocol/NFTOracle.sol";
+import {CollateralPool} from "../contracts/protocol/CollateralPool.sol";
+import {CollateralPoolAddressesProvider,ICollateralPoolAddressesProvider} from "../contracts/protocol/CollateralPoolAddressesProvider.sol";
+import {SToken} from "../contracts/protocol/SToken.sol";
 
-import { CollateralizeSetUp } from "./helper/CollaterlizeSetup.sol";
-import { console } from "forge-std/console.sol";
-import { PunkWarriorErc721, ERC721, IERC721 } from "../contracts/PunkWarriorErc721.sol";
-import { NFTOracle } from "../contracts/protocol/NFTOracle.sol";
-import { CollateralPool } from "../contracts/protocol/CollateralPool.sol";
-import { CollateralPoolAddressesProvider,ICollateralPoolAddressesProvider } from "../contracts/protocol/CollateralPoolAddressesProvider.sol";
-import { SToken } from "../contracts/protocol/SToken.sol";
-
-contract SimpDutchAuction is CollateralizeSetUp {
+contract DutchAuction is GeneralSetUp {
 
     function setUp() public override {
         super.setUp();
@@ -27,10 +27,9 @@ contract SimpDutchAuction is CollateralizeSetUp {
             0.5*1e18, 
             20
             );
-        // richer collateralize BAYC to get sToken
         vm.stopPrank();
-
         skip(3 minutes);
+        // richer collateralize BAYC to get sToken
         vm.startPrank(richer1);
         IERC721(BAYC).approve(address(collateralPool), 7737);
         collateralPool.collateralize(BAYC, 7737);

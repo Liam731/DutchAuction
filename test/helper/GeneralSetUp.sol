@@ -9,7 +9,7 @@ import {CollateralPoolAddressesProvider,ICollateralPoolAddressesProvider} from "
 import {SToken} from "../../contracts/protocol/SToken.sol";
 import {DataTypes} from "../../contracts/libraries/types/DataTypes.sol";
 
-contract CollateralizeSetUp is Test {
+contract GeneralSetUp is Test {
 
     address public constant admin = 0x1D36536728a32B5A9511E20cdc7eBA6DD4e3A253;
     address public constant richer1 = 0xC0cd81fD027282A1113a1c24D6E38A7cEd2a1537;
