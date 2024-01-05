@@ -13,16 +13,12 @@ contract CollateralPoolAddressesProvider is ICollateralPoolAddressesProvider {
         admin = msg.sender;
     }
 
-    modifier onlyAdmin() {
-        require(admin == msg.sender, "only admin");
-        _;
-    }
-
     function getAddress(bytes32 id) public view override returns (address) {
         return _addresses[id];
     }
 
-    function setAddress(bytes32 id, address newAddress) external override onlyAdmin {
+    function setAddress(bytes32 id, address newAddress) external override {
+        require(admin == msg.sender, "Only admin");
         _addresses[id] = newAddress;
     }
 
