@@ -14,6 +14,11 @@ library DataTypes {
         uint256 nftTokenId;
     }
 
+    struct ExecuteSwapParams {
+        address initiator;
+        uint256 amountIn;
+    }
+
     struct LoanData {
         address initiator;
         address nftAsset;

@@ -7,6 +7,7 @@ import {SToken} from "./SToken.sol";
 
 import {CollateralizeLogic} from "../libraries/logic/CollateralizeLogic.sol";
 import {LiquidateLogic} from "../libraries/logic/LiquidateLogic.sol";
+import {SwapTokensLogic} from "../libraries/logic/SwapTokensLogic.sol";
 import {DataTypes} from "../libraries/types/DataTypes.sol";
 import {CollateralPoolStorage} from "./CollateralPoolStorage.sol";
 
@@ -26,7 +27,7 @@ contract CollateralPool is ICollateralPool, CollateralPoolStorage, IERC721Receiv
         _sToken = sToken;
         _initialized = true;
 
-        emit Initialized(address(provider));
+        emit Initialized(address(provider), address(sToken));
     }
 
     function collateralize(address nftAsset, uint256 nftTokenId) external override {
@@ -53,16 +54,29 @@ contract CollateralPool is ICollateralPool, CollateralPoolStorage, IERC721Receiv
                 })
             );
     }
+
+    function swapExactTokensForETH(uint256 amountIn) external override {
+        require(isWhitelisted(msg.sender), "Not in whitelist");
+        SwapTokensLogic.executeSwap(
+            _sToken,
+            DataTypes.ExecuteSwapParams({
+                initiator: msg.sender,
+                amountIn: amountIn
+            })
+        );
+
+    }
+
     function addToWhitelist(address actionAddress) external onlyAdmin {
-        whitelist[actionAddress] = true;
+        _whitelist[actionAddress] = true;
     }
 
     function removeFromWhitelist(address actionAddress) external onlyAdmin {
-        whitelist[actionAddress] = false;
+        _whitelist[actionAddress] = false;
     }
 
-    function isWhitelisted(address actionAddress) external view returns (bool) {
-        return whitelist[actionAddress];
+    function isWhitelisted(address actionAddress) public view returns (bool) {
+        return _whitelist[actionAddress];
     }
 
     function onERC721Received(
