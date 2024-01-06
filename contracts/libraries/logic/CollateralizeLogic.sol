@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import {console} from "forge-std/console.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {SToken} from "../../protocol/SToken.sol";
 import {NFTOracle} from "../../protocol/NFTOracle.sol";
 import {DataTypes} from "../types/DataTypes.sol";
 import {ICollateralPoolLoan} from "../../interfaces/ICollateralPoolLoan.sol";
+import {ICollateralPoolHandler} from "../../interfaces/ICollateralPoolHandler.sol";
 import {ICollateralPoolAddressesProvider} from "../../interfaces/ICollateralPoolAddressesProvider.sol";
 
 library CollateralizeLogic {
@@ -14,10 +14,12 @@ library CollateralizeLogic {
 
     struct ExecuteCollateralizeLocalVars {
         address initiator;
-        uint256 rewardAmount;
+        address loanAddress;
+        address handler;
         address nftOracle;
         uint256 loanId;
-        address loanAddress;
+        uint256 currentPrice;
+        uint256 rewardAmount;
     }
 
     event Collateralize(
@@ -38,14 +40,16 @@ library CollateralizeLogic {
         ExecuteCollateralizeLocalVars memory vars;
         vars.initiator = params.initiator;
         vars.loanAddress = addressesProvider.getCollateralPoolLoan();
-
+        vars.handler = addressesProvider.getCollateralPoolHandler();
+        vars.nftOracle = addressesProvider.getNftOracle();
+        
         vars.loanId = ICollateralPoolLoan(vars.loanAddress).getCollateralLoanId(params.nftAsset, params.nftTokenId);
         require(vars.loanId == 0, "Nft already collateralized");
 
-        vars.nftOracle = addressesProvider.getNftOracle();
-        int nftPrice = NFTOracle(vars.nftOracle).getLatestPrice();
-        //collateral factor = 60%
-        vars.rewardAmount = (uint256(nftPrice) * 6) / 10;
+        vars.currentPrice = uint256(NFTOracle(vars.nftOracle).getLatestPrice());     
+        // Calculate reward
+        uint256 collateralFactor = ICollateralPoolHandler(vars.handler).getCollateralFactor();
+        vars.rewardAmount = (vars.currentPrice * collateralFactor) / 1e18;
 
         vars.loanId = ICollateralPoolLoan(vars.loanAddress).createLoan(vars.initiator, params.nftAsset, params.nftTokenId, vars.rewardAmount);
         // Transfer NFT
