@@ -12,9 +12,6 @@ contract CollaterlizeTest is GeneralSetUp {
     }
 
     function testNFTOracle() public {
-        
-        //Deploy NFTOracle
-        nftOracle = NFTOracle(chainlinkOracle);
         //Prank admin
         vm.startPrank(admin);        
         //Set Azuki NFT address

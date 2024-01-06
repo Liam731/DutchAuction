@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-
 import {INFTOracle} from "../interfaces/INFTOracle.sol";
 
 contract NFTOracle {
