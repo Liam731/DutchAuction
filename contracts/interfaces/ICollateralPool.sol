@@ -8,5 +8,7 @@ interface ICollateralPool {
 
   function redeem(address nftAsset, uint256 nftTokenId) external payable returns (uint256);
 
+  function liquidate(address nftAsset, uint256 nftTokenId) external payable ;
+
   function swapExactTokensForETH(uint256 amountIn) external;
 }

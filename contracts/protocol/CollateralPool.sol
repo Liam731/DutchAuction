@@ -55,6 +55,18 @@ contract CollateralPool is ICollateralPool, CollateralPoolStorage, IERC721Receiv
             );
     }
 
+    function liquidate(address nftAsset, uint256 nftTokenId) external payable override {
+        LiquidateLogic.executeLiquidate(
+            _addressesProvider,
+            _sToken,
+            DataTypes.ExecuteLiquidateParams({
+                initiator: msg.sender,
+                nftAsset: nftAsset,
+                nftTokenId: nftTokenId
+            })
+        );
+    }
+
     function swapExactTokensForETH(uint256 amountIn) external override {
         require(isWhitelisted(msg.sender), "Not in whitelist");
         SwapTokensLogic.executeSwap(

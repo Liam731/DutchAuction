@@ -14,6 +14,12 @@ library DataTypes {
         uint256 nftTokenId;
     }
 
+    struct ExecuteLiquidateParams {
+        address initiator;
+        address nftAsset;
+        uint256 nftTokenId;
+    }
+
     struct ExecuteSwapParams {
         address initiator;
         uint256 amountIn;
