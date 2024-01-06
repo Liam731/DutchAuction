@@ -162,7 +162,7 @@ contract DutchAuction {
 
     function withdraw(uint256 amount, address to) external onlyAdmin {
         require(!auctionData[auctionIndex].isAuctionActivated,"Auction still in progress");
-        address collateralPool = _addressesProvider.getAddress("COLLATERAL_POOL");
+        address collateralPool = _addressesProvider.getCollateralPool();
         ICollateralPool(collateralPool).swapExactTokensForETH(amount);
         (bool success, ) = to.call{value: amount}("");
         require(success, "Transfer ETH failed");

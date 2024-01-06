@@ -33,14 +33,6 @@ library CollateralizeLogic {
         SToken sToken,
         DataTypes.ExecuteCollateralizeParams memory params
     ) external {
-        _collateralize(addressesProvider, sToken, params);
-    }
-
-    function _collateralize(
-        ICollateralPoolAddressesProvider addressesProvider,
-        SToken sToken,
-        DataTypes.ExecuteCollateralizeParams memory params
-    ) internal {
         require(params.nftAsset == BAYCAddress, "The collateralized NFT asset is not BAYC");
 
         ExecuteCollateralizeLocalVars memory vars;
