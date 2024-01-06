@@ -5,6 +5,7 @@ import {PunkWarriorErc721, ERC721, IERC721} from "../../contracts/PunkWarriorErc
 import {NFTOracle} from "../../contracts/protocol/NFTOracle.sol";
 import {CollateralPool} from "../../contracts/protocol/CollateralPool.sol";
 import {CollateralPoolLoan} from "../../contracts/protocol/CollateralPoolLoan.sol";
+import {CollateralPoolHandler,ICollateralPoolHandler} from "../../contracts/protocol/CollateralPoolHandler.sol";
 import {CollateralPoolAddressesProvider,ICollateralPoolAddressesProvider} from "../../contracts/protocol/CollateralPoolAddressesProvider.sol";
 import {SToken} from "../../contracts/protocol/SToken.sol";
 import {DataTypes} from "../../contracts/libraries/types/DataTypes.sol";
@@ -17,20 +18,24 @@ contract GeneralSetUp is Test {
     address public constant BAYC = 0xE29F8038d1A3445Ab22AD1373c65eC0a6E1161a4;
     address public constant AZUKI = 0x10B8b56D53bFA5e374f38e6C0830BAd4ebeE33E6;
     address public constant chainlinkOracle = 0xEb1C76Fb7A575D2b2016e99221eB4B0BC43cD3bd;
+    address public user1;
     CollateralPool public collateralPool;
     CollateralPoolLoan public collateralPoolLoan;
+    CollateralPoolHandler public handler;
     CollateralPoolAddressesProvider public addressesProvider;
     PunkWarriorErc721 public erc721;
     SToken public sToken;
     bytes32 public constant NFT_ORACLE = "NFT_ORACLE";
     bytes32 public constant COLLATERAL_POOL = "COLLATERAL_POOL";
     bytes32 public constant COLLATERAL_POOL_LOAN = "COLLATERAL_POOL_LOAN";
+    bytes32 public constant COLLATERAL_POOL_HANDLER = "COLLATERAL_POOL_HANDLER";
 
     NFTOracle public nftOracle;
 
     function setUp() public virtual{
         vm.createSelectFork(vm.envString("GOERLI_RPC_RUL"));
-        
+        user1 = makeAddr("User1");
+        vm.deal(user1, 100 ether);
         vm.startPrank(admin);
         // Depoly collateral pool addresses provider
         addressesProvider = new CollateralPoolAddressesProvider();
@@ -42,10 +47,22 @@ contract GeneralSetUp is Test {
         // Deploy collateral pool loan
         collateralPoolLoan = new CollateralPoolLoan();
         collateralPoolLoan.initialize(ICollateralPoolAddressesProvider(addressesProvider));
-        // Set addresses
-        addressesProvider.setAddress(NFT_ORACLE,chainlinkOracle);
-        addressesProvider.setAddress(COLLATERAL_POOL,address(collateralPool));
-        addressesProvider.setAddress(COLLATERAL_POOL_LOAN,address(collateralPoolLoan));
+        // Deploy collateral pool handler
+        handler = new CollateralPoolHandler();
+        // Set collateral factor = 60%
+        ICollateralPoolHandler(handler).setCollateralFactor(60 * 1e16);
+        // Set liquidate factor = 75%
+        ICollateralPoolHandler(handler).setLiquidateFactor(75 * 1e16);
+        // Set liquidation incentive = 10%
+        ICollateralPoolHandler(handler).setLiquidationIncentive(10 * 1e16);
+        // Deploy NFTOracle
+        nftOracle = NFTOracle(chainlinkOracle);
+        // Set collateral pool addresses
+        addressesProvider.setAddress(NFT_ORACLE, address(nftOracle));
+        addressesProvider.setAddress(COLLATERAL_POOL, address(collateralPool));
+        addressesProvider.setAddress(COLLATERAL_POOL_LOAN, address(collateralPoolLoan));
+        addressesProvider.setAddress(COLLATERAL_POOL_HANDLER, address(handler));
+        
         // Depoly PunkWarriorErc721 with DutchAuction
         erc721 = new PunkWarriorErc721();
         erc721.initialize(ICollateralPoolAddressesProvider(addressesProvider), sToken);

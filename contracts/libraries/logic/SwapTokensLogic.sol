@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import {console} from "forge-std/console.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {SToken} from "../../protocol/SToken.sol";
 import {NFTOracle} from "../../protocol/NFTOracle.sol";
 import {DataTypes} from "../types/DataTypes.sol";
 import {ICollateralPoolLoan} from "../../interfaces/ICollateralPoolLoan.sol";
+import {ICollateralPoolHandler} from "../../interfaces/ICollateralPoolHandler.sol";
 import {ICollateralPoolAddressesProvider} from "../../interfaces/ICollateralPoolAddressesProvider.sol";
 
 library SwapTokensLogic {

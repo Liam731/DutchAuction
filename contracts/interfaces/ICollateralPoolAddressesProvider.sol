@@ -11,4 +11,6 @@ interface ICollateralPoolAddressesProvider {
   function getCollateralPool() external view returns (address);
 
   function getCollateralPoolLoan() external view returns (address);
+
+  function getCollateralPoolHandler() external view returns (address);
 }

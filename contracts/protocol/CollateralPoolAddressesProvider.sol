@@ -8,6 +8,7 @@ contract CollateralPoolAddressesProvider is ICollateralPoolAddressesProvider {
     bytes32 private constant NFT_ORACLE = "NFT_ORACLE";
     bytes32 private constant COLLATERAL_POOL = "COLLATERAL_POOL";
     bytes32 private constant COLLATERAL_POOL_LOAN = "COLLATERAL_POOL_LOAN";
+    bytes32 private constant COLLATERAL_POOL_HANDLER = "COLLATERAL_POOL_HANDLER";
 
     constructor() {
         admin = msg.sender;
@@ -32,5 +33,9 @@ contract CollateralPoolAddressesProvider is ICollateralPoolAddressesProvider {
 
     function getCollateralPoolLoan() external view override returns (address) {
         return getAddress(COLLATERAL_POOL_LOAN);
+    }
+
+    function getCollateralPoolHandler() external view override returns (address) {
+        return getAddress(COLLATERAL_POOL_HANDLER);
     }
 }
