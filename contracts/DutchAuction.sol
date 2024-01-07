@@ -49,7 +49,7 @@ contract DutchAuction {
     }
 
     modifier onlyAuctioner() {
-        require(msg.sender == auctioner, "Only auctioner can call this function.");
+        require(msg.sender == auctioner, "Only auctioner can call this function");
         _;
     }
 
@@ -86,11 +86,9 @@ contract DutchAuction {
 
     function bid(uint256 bidPrice) external {
         Auctions memory currentAuction = auctionData[auctionIndex];
-        Bids memory currentbids = allBids[auctionIndex][
-            currentAuction.totalBids
-        ];
+        Bids memory currentbids = allBids[auctionIndex][currentAuction.totalBids];
 
-        _bidAllowed(bidPrice, currentbids, currentAuction);
+        _bidAllowed(bidPrice, currentAuction);
 
         _sToken.transferFrom(msg.sender, address(this), bidPrice);
         currentbids.bidder = msg.sender;
@@ -153,6 +151,7 @@ contract DutchAuction {
 
     function withdraw(uint256 amount, address to) external onlyAuctioner {
         require(!auctionData[auctionIndex].isAuctionActivated,"Auction still in progress");
+        require(to != address(0), "Recipient is the zero address");
         address collateralPool = _addressesProvider.getCollateralPool();
         ICollateralPool(collateralPool).swapExactTokensForETH(amount);
         (bool success, ) = to.call{value: amount}("");
@@ -184,7 +183,6 @@ contract DutchAuction {
 
     function _bidAllowed(
         uint256 bidPrice,
-        Bids memory currentbids,
         Auctions memory currentAuction
     ) internal view {
         if (block.timestamp > currentAuction.endTime) {
@@ -195,6 +193,5 @@ contract DutchAuction {
         require(currentAuction.totalBids < currentAuction.totalForAuction,"Auction is full");
         require(_sToken.balanceOf(msg.sender) >= bidPrice,"Insuficient token balance");
         require(bidPrice >= getAuctionPrice(), "Bid price not high enough");
-        require(currentbids.finalProcess == 0, "Bid not placed");
     }
 }

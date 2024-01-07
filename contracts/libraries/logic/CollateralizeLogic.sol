@@ -35,7 +35,7 @@ library CollateralizeLogic {
         SToken sToken,
         DataTypes.ExecuteCollateralizeParams memory params
     ) external {
-        require(params.nftAsset == BAYCAddress, "The collateralized NFT asset is not BAYC");
+        require(params.nftAsset == BAYCAddress, "NFT asset is not BAYC");
 
         ExecuteCollateralizeLocalVars memory vars;
         vars.initiator = params.initiator;

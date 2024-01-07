@@ -19,7 +19,7 @@ contract CollateralPoolAddressesProvider is ICollateralPoolAddressesProvider {
     }
 
     function setAddress(bytes32 id, address newAddress) external override {
-        require(admin == msg.sender, "Only admin");
+        require(admin == msg.sender, "Only admin can call this function");
         _addresses[id] = newAddress;
     }
 

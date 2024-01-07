@@ -34,7 +34,7 @@ contract NFTOracle {
     }
 
     function setNftAddress(address nftAddress) public returns (bool) {
-        require(msg.sender == priceFeedAdmin, "NFTOracle: only admin can change NFT address");
+        require(msg.sender == priceFeedAdmin, "Only admin can change NFT address");
         nftFloorPriceFeed = INFTOracle(nftAddress);
         return true;
     }

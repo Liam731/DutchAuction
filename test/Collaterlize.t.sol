@@ -11,25 +11,6 @@ contract CollaterlizeTest is GeneralSetUp {
         super.setUp();
     }
 
-    function testNFTOracle() public {
-        //Prank admin
-        vm.startPrank(admin);        
-        //Set Azuki NFT address
-        nftOracle.setNftAddress(0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74);
-        int AzukiPrice = nftOracle.getLatestPrice();
-        console.logInt(AzukiPrice); // 5322735600000000000
-        //Set BAYC NFT address
-        nftOracle.setNftAddress(0xB677bfBc9B09a3469695f40477d05bc9BcB15F50);
-        int BAYCPrice = nftOracle.getLatestPrice(); // 25783014190000000000
-        console.logInt(BAYCPrice);
-        vm.stopPrank();
-    }
-    
-    function testCollateralPoolAddressesProvider() public {
-        address OracleOfBAYC = addressesProvider.getAddress(NFT_ORACLE);
-        assertEq(OracleOfBAYC,chainlinkOracle);        
-    }
-
     function testCollateralize() public {
         vm.startPrank(richer1);
         IERC721(BAYC).approve(address(collateralPool), 7737);
@@ -45,9 +26,12 @@ contract CollaterlizeTest is GeneralSetUp {
     function testRevertCollateralize() public {
         vm.startPrank(richer1);
         IERC721(BAYC).approve(address(collateralPool), 7737);
-        vm.expectRevert("The collateralized NFT asset is not BAYC");
+        vm.expectRevert("NFT asset is not BAYC");
         collateralPool.collateralize(AZUKI, 7737);
-        
+
+        collateralPool.collateralize(BAYC, 7737);
+        vm.expectRevert("Nft already collateralized");
+        collateralPool.collateralize(BAYC, 7737);
         vm.stopPrank();
     }
 

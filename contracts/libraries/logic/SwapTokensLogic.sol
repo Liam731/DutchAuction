@@ -9,12 +9,9 @@ import {ICollateralPoolHandler} from "../../interfaces/ICollateralPoolHandler.so
 import {ICollateralPoolAddressesProvider} from "../../interfaces/ICollateralPoolAddressesProvider.sol";
 
 library SwapTokensLogic {
-    event Redeem(
+    event Swap(
         address indexed user,
-        uint256 indexed repayAmount,
-        address nftAsset,
-        uint256 indexed nftTokenId,
-        uint256 loanId
+        uint256 amountIn
     );
 
     function executeSwap(
@@ -26,5 +23,7 @@ library SwapTokensLogic {
         sToken.burn(params.initiator, params.amountIn);
         (bool success, ) = (params.initiator).call{value: params.amountIn}("");
         require(success, "Swap ETH failed");
+
+        emit Swap(params.initiator, params.amountIn);
     }
 }
