@@ -16,19 +16,25 @@ contract CollaterlizeTest is GeneralSetUp {
         IERC721(BAYC).approve(address(collateralPool), 7737);
         collateralPool.collateralize(BAYC, 7737);
         vm.stopPrank();
+
         vm.startPrank(richer2);
         IERC721(BAYC).approve(address(collateralPool), 5904);
         collateralPool.collateralize(BAYC, 5904);
         vm.stopPrank();
+        
         _checkCreateLoan();
     }
 
-    function testRevertCollateralize() public {
+    function testRevertWithNotBAYC() public {
         vm.startPrank(richer1);
         IERC721(BAYC).approve(address(collateralPool), 7737);
         vm.expectRevert("NFT asset is not BAYC");
         collateralPool.collateralize(AZUKI, 7737);
+        vm.stopPrank();
+    }
 
+    function testRevertWithAlreadyCollateralize() public {
+        vm.startPrank(richer1);
         collateralPool.collateralize(BAYC, 7737);
         vm.expectRevert("Nft already collateralized");
         collateralPool.collateralize(BAYC, 7737);
