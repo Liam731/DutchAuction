@@ -44,9 +44,13 @@ contract CollaterlizeTest is GeneralSetUp {
     function _checkCreateLoan() internal {
         uint256 loanId1 = collateralPoolLoan.getCollateralLoanId(BAYC, 7737);
         DataTypes.LoanData memory loanData = collateralPoolLoan.getLoan(loanId1);
+        uint256 currentPrice = uint256(nftOracle.getLatestPrice());
+        uint256 collateralFactor = handler.getCollateralFactor();
+
         assertEq(loanId1, 1);
         assertEq(loanData.initiator, richer1);
         assertEq(loanData.nftAsset, BAYC);
         assertEq(loanData.nftTokenId, 7737);
+        assertEq(loanData.rewardAmount, currentPrice * collateralFactor / 1e18);
     }
 }
