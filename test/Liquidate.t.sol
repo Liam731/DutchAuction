@@ -38,6 +38,29 @@ contract LiquidateTest is GeneralSetUp {
         assertEq(sToken.balanceOf(richer1), 0);
     }
 
+    function testRevertWithInvalidNFT() public {
+        _collateralize();
+        _setCollateralAsLiquidatable();
+        vm.expectRevert("NFT is not collateral");
+        (bool success, ) = address(collateralPool).call{value : 10 ether}(abi.encodeWithSignature("liquidate(address,uint256)", BAYC, 0));
+        require(success);
+    }
+
+    function testRevertWithHealthFactor() public {
+        _collateralize();
+        vm.expectRevert("Liquidation cannot be executed, health factor must be less than 1");
+        (bool success, ) = address(collateralPool).call{value : 10 ether}(abi.encodeWithSignature("liquidate(address,uint256)", BAYC, 7737));
+        require(success);
+    }
+
+    function testRevertWithLowBalance() public {
+        _collateralize();
+        _setCollateralAsLiquidatable();
+        vm.expectRevert("Not enough balance for liquidation");
+        (bool success, ) = address(collateralPool).call{value : 10 ether}(abi.encodeWithSignature("liquidate(address,uint256)", BAYC, 7737));
+        require(success);
+    }
+
     function _setAuction() internal {
         vm.startPrank(admin);
         // start DutchAuction
@@ -72,7 +95,7 @@ contract LiquidateTest is GeneralSetUp {
         uint256 currentPrice = uint256(nftOracle.getLatestPrice());
         uint256 liquidateRequireAmount = currentPrice - (currentPrice * incentive / 1e18);
         (bool success, ) = address(collateralPool).call{value : liquidateRequireAmount}(abi.encodeWithSignature("liquidate(address,uint256)", BAYC, 7737));
-        assertEq(success, true);
+        require(success);
         vm.stopPrank();
         return liquidateRequireAmount;
     }

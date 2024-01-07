@@ -6,7 +6,7 @@ pragma solidity ^0.8.19;
  * @notice Defines the basic interface of a dutch-auction-receiver contract.
  * @dev Implement this interface to develop a dutch-auction-compatible dutchAuctionReceiver contract
  */
-interface IDutchAuctionManager {
+interface IDutchAuctionHandler {
   /**
    * @notice Executes an operation after transfer sToken to the auction
    * @dev Ensure that the bidder can claim the their auction item

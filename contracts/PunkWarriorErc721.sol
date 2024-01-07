@@ -14,6 +14,7 @@ contract PunkWarriorErc721 is ERC721, DutchAuction {
     }
 
     function tansferAuctionItem(address bidder, uint256 itemIndex) external returns (bool) {
+        require(msg.sender == address(this), "Only this contract can mint");
         _mint(bidder, itemIndex);
         return true;
     }

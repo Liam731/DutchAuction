@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import {GeneralSetUp} from "./helper/GeneralSetUp.sol";
 import {console} from "forge-std/console.sol";
+import {NFTOracle} from "../contracts/protocol/NFTOracle.sol";
 import {ICollateralPoolAddressesProvider} from "../contracts/interfaces/ICollateralPoolAddressesProvider.sol";
 
 contract CollateralPoolTest is GeneralSetUp {
@@ -12,6 +13,20 @@ contract CollateralPoolTest is GeneralSetUp {
     function testCollateralPoolAddressesProvider() public {
         address OracleOfBAYC = addressesProvider.getAddress(NFT_ORACLE);
         assertEq(OracleOfBAYC,chainlinkOracle);        
+    }
+
+    function testNFTOracle() public {
+        vm.startPrank(admin);      
+        NFTOracle oracle = new NFTOracle();  
+        //Set Azuki NFT address
+        oracle.setNftAddress(0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74);
+        int AzukiPrice = oracle.getLatestPrice();
+        console.logInt(AzukiPrice);
+        vm.stopPrank();
+        vm.startPrank(user1);
+        vm.expectRevert("Only admin can change NFT address");
+        oracle.setNftAddress(0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74);
+        vm.stopPrank();
     }
 
     function testInitialized() public {

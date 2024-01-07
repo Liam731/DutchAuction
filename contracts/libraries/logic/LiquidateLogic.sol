@@ -126,7 +126,7 @@ library LiquidateLogic {
             vars.refundAmount = vars.liquidateRequireAmount;
             sToken.burn(loanData.initiator, loanData.rewardAmount);   
         }
-        (bool success, ) = loanData.initiator.call{value: vars.refundAmount}("");
+        (bool success, ) = (loanData.initiator).call{value: vars.refundAmount}("");
         require(success, "Refund ETH failed");
         IERC721(params.nftAsset).safeTransferFrom(address(this), vars.initiator ,params.nftTokenId);
 

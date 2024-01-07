@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {SToken} from "./protocol/SToken.sol";
-import {IDutchAuctionManager} from "./interfaces/IDutchAuctionManager.sol";
+import {IDutchAuctionHandler} from "./interfaces/IDutchAuctionHandler.sol";
 import {ICollateralPool} from "./interfaces/ICollateralPool.sol";
 import {ICollateralPoolAddressesProvider} from "./interfaces/ICollateralPoolAddressesProvider.sol";
 
@@ -18,8 +18,8 @@ contract DutchAuction {
 
     event Bid(
         address indexed bidder,
-        uint256 itemIndex,
         uint256 bidPrice,
+        uint256 itemIndex,
         uint256 finalProcess
     );
 
@@ -70,7 +70,6 @@ contract DutchAuction {
         uint256 _priceStep,
         uint256 _totalForAuction
     ) external onlyAuctioner {
-        require(msg.sender == auctioner, "Only auctionr is authorized to conduct auction");
         require(!auctionData[auctionIndex].isAuctionActivated,"Auction still in progress");
         require(auctionData[auctionIndex].isAllRefunded,"Auction not refunded yet");
         auctionIndex++;
@@ -100,8 +99,8 @@ contract DutchAuction {
 
         emit Bid(
             currentbids.bidder,
-            currentbids.itemIndex,
             currentbids.bidPrice,
+            currentbids.itemIndex,
             currentbids.finalProcess
         );
         auctionData[auctionIndex] = currentAuction;
@@ -125,11 +124,11 @@ contract DutchAuction {
         ) {
             Bids memory currentbids = allBids[auctionIndex][i];
             require(
-                IDutchAuctionManager(address(this)).tansferAuctionItem(
+                IDutchAuctionHandler(address(this)).tansferAuctionItem(
                     currentbids.bidder,
                     currentbids.itemIndex
                 ),
-                "Invalid auction executor return"
+                "Tansfer auction item falied"
             );
             uint256 refund = currentbids.bidPrice - lastPrice;
             if (refund > 0) {
@@ -158,10 +157,12 @@ contract DutchAuction {
         require(success, "Transfer ETH failed");
     }
 
-    function getPersonalBidData(
-        uint256 _auctionIndex,
-        uint256 _itemIndex
-    ) external view returns (Bids memory) {
+    function setActionDeactivated() external {
+        require(block.timestamp > auctionData[auctionIndex].endTime, "Auction hasn't reached its end time yet");
+        auctionData[auctionIndex].isAuctionActivated = false;
+    }
+
+    function getPersonalBidData(uint256 _auctionIndex, uint256 _itemIndex) external view returns (Bids memory) {
         return allBids[_auctionIndex][_itemIndex];
     }
 
@@ -185,10 +186,7 @@ contract DutchAuction {
         uint256 bidPrice,
         Auctions memory currentAuction
     ) internal view {
-        if (block.timestamp > currentAuction.endTime) {
-            currentAuction.isAuctionActivated = false;
-        }
-        require(currentAuction.isAuctionActivated, "Auction not activated");
+        require(block.timestamp <= currentAuction.endTime, "Auction not activated");
         require(block.timestamp >= currentAuction.startTime,"Auction not started");
         require(currentAuction.totalBids < currentAuction.totalForAuction,"Auction is full");
         require(_sToken.balanceOf(msg.sender) >= bidPrice,"Insuficient token balance");

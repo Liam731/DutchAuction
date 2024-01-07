@@ -11,8 +11,8 @@ contract RedeemTest is GeneralSetUp {
     }
     
     function testRedeem() public {
-        vm.startPrank(richer1);
         _collateralize();
+        vm.startPrank(richer1);
         uint256 loanId = collateralPoolLoan.getCollateralLoanId(BAYC, 7737);
         DataTypes.LoanData memory loanData = collateralPoolLoan.getLoan(loanId);
         sToken.approve(address(collateralPool), loanData.rewardAmount);
@@ -24,8 +24,8 @@ contract RedeemTest is GeneralSetUp {
 
     function testRedeemAfterBidAuction() public {
         _setAuction();
-        vm.startPrank(richer1);
         _collateralize();
+        vm.startPrank(richer1);
         sToken.approve(address(erc721), 10 * 1e18);
         erc721.bid(10 * 1e18);
         sToken.approve(address(collateralPool), 15475733742000000000);
@@ -33,6 +33,33 @@ contract RedeemTest is GeneralSetUp {
         require(success);
         assertEq(IERC721(BAYC).ownerOf(7737), richer1);
         vm.stopPrank();
+    }
+
+    function testRevertWithInvalidNFT() public {
+        _collateralize();
+        vm.startPrank(richer1);
+        sToken.approve(address(collateralPool), 100 * 1e18);
+        vm.expectRevert("NFT is not collateral");
+        collateralPool.redeem(BAYC, 0);
+    }
+
+    function testRevertWithNotNftOwner() public{
+        _collateralize();
+        vm.startPrank(user1);
+        sToken.approve(address(collateralPool), 100 * 1e18);
+        vm.expectRevert("Not NFT owner");
+        collateralPool.redeem(BAYC, 7737);
+    }
+
+    function testRevertWith3() public{
+        _setAuction();
+        _collateralize();
+        vm.startPrank(richer1);
+        sToken.approve(address(erc721), 10 * 1e18);
+        erc721.bid(10 * 1e18);
+        sToken.approve(address(collateralPool), 100 * 1e18);
+        vm.expectRevert("Not enough balance for redeem");
+        collateralPool.redeem(BAYC, 7737);
     }
 
     function _setAuction() internal {
@@ -51,8 +78,9 @@ contract RedeemTest is GeneralSetUp {
     }
 
     function _collateralize() internal {
+        vm.startPrank(richer1);
         IERC721(BAYC).approve(address(collateralPool), 7737);
         collateralPool.collateralize(BAYC, 7737);
-
+        vm.stopPrank();
     }
 }
