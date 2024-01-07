@@ -42,10 +42,10 @@ contract CollateralPoolHandler is ICollateralPoolHandler {
         // Save current value for use in log
         uint256 oldCollateralFactorMantissa = collateralFactorMantissa;
 
-        // Set liquidation incentive to new incentive
+        // Set collateral factor to new incentive
         collateralFactorMantissa = newCollateralFactorMantissa;
 
-        // Emit event with old incentive, new incentive
+        // Emit event with old collateral factor, new collateral factor
         emit NewLiquidationIncentive(oldCollateralFactorMantissa, newCollateralFactorMantissa);
 
         return true;
@@ -55,10 +55,10 @@ contract CollateralPoolHandler is ICollateralPoolHandler {
         // Save current value for use in log
         uint256 oldLiquidateFactorMantissa = liquidateFactorMantissa;
 
-        // Set liquidation incentive to new incentive
+        // Set liquidate factor to new incentive
         liquidateFactorMantissa = newLiquidateFactorMantissa;
 
-        // Emit event with old incentive, new incentive
+        // Emit event with old liquidate factor, new liquidate factor
         emit NewLiquidationIncentive(oldLiquidateFactorMantissa, newLiquidateFactorMantissa);
 
         return true;
