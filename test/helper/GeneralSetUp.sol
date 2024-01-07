@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {Test} from "forge-std/Test.sol";
-import {PunkWarriorErc721, ERC721, IERC721} from "../../contracts/PunkWarriorErc721.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {PunkWarriorErc721} from "../../contracts/PunkWarriorErc721.sol";
 import {NFTOracle} from "../../contracts/protocol/NFTOracle.sol";
 import {CollateralPool} from "../../contracts/protocol/CollateralPool.sol";
 import {CollateralPoolLoan} from "../../contracts/protocol/CollateralPoolLoan.sol";
@@ -39,11 +41,11 @@ contract GeneralSetUp is Test {
         vm.startPrank(admin);
         // Depoly collateral pool addresses provider
         addressesProvider = new CollateralPoolAddressesProvider();
-        // Depoly collateral pool
+        // Depoly collateral pool with sToken
         collateralPool = new CollateralPool();
-        vm.deal(address(collateralPool), 100 ether);
         sToken = new SToken(address(collateralPool));
         collateralPool.initialize(ICollateralPoolAddressesProvider(addressesProvider), sToken);
+        vm.deal(address(collateralPool), 100 ether);
         // Deploy collateral pool loan
         collateralPoolLoan = new CollateralPoolLoan();
         collateralPoolLoan.initialize(ICollateralPoolAddressesProvider(addressesProvider));

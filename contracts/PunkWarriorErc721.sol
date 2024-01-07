@@ -9,7 +9,7 @@ contract PunkWarriorErc721 is ERC721, DutchAuction {
 
     constructor() ERC721("Punk Warrior NFT", "PWNFT") DutchAuction() {}
 
-    function setBaseURI(string calldata baseURI_) external {
+    function setBaseURI(string calldata baseURI_) external onlyAuctioner {
         baseURI = baseURI_;
     }
 

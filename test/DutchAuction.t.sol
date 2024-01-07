@@ -5,6 +5,8 @@ import {GeneralSetUp} from "./helper/GeneralSetUp.sol";
 import {console} from "forge-std/console.sol";
 import {NFTOracle} from "../contracts/protocol/NFTOracle.sol";
 import {DutchAuction} from "../contracts/DutchAuction.sol";
+import {PunkWarriorErc721} from "../contracts/PunkWarriorErc721.sol";
+import {ICollateralPoolAddressesProvider} from "../contracts/protocol/CollateralPoolAddressesProvider.sol";
 
 contract DutchAuctionTest is GeneralSetUp {
     function setUp() public override {
@@ -77,6 +79,19 @@ contract DutchAuctionTest is GeneralSetUp {
         skip(30 minutes);
         vm.expectRevert("Auction not activated");
         erc721.bid(7 * 1e18);
+        vm.stopPrank();
+    }
+
+    function testInitializeWithDutchAuction() public {
+        vm.startPrank(admin);
+        erc721 = new PunkWarriorErc721();
+        erc721.initialize(ICollateralPoolAddressesProvider(addressesProvider), sToken);
+        vm.stopPrank();
+    }
+
+    function testSetTokenURI() public {
+        vm.startPrank(admin);
+        erc721.setBaseURI("ipfs://QmfE1NWNVKtz7KaP2Ussz8xWcds6objCTekK6evn413eXh/1.json");
         vm.stopPrank();
     }
 
