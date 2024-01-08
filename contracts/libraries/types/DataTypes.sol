@@ -8,6 +8,13 @@ library DataTypes {
         uint256 nftTokenId;
     }
 
+    struct ExecuteRepayParams {
+        address initiator;
+        address nftAsset;
+        uint256 nftTokenId;
+        uint256 amount;
+    }
+
     struct ExecuteRedeemParams {
         address initiator;
         address nftAsset;
@@ -30,5 +37,6 @@ library DataTypes {
         address nftAsset;
         uint256 nftTokenId;
         uint256 rewardAmount;
+        uint256 repayAmount;
     }
 }

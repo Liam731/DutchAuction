@@ -22,6 +22,14 @@ library CollateralizeLogic {
         uint256 rewardAmount;
     }
 
+    struct ExecuteRepayLocalVars {
+        address initiator;
+        address loanAddress;
+        address handler;
+        uint256 amount;
+        uint256 loanId;
+    }
+
     event Collateralize(
         address user,
         address nftAsset,
@@ -51,7 +59,7 @@ library CollateralizeLogic {
         uint256 collateralFactor = ICollateralPoolHandler(vars.handler).getCollateralFactor();
         vars.rewardAmount = (vars.currentPrice * collateralFactor) / 1e18;
 
-        vars.loanId = ICollateralPoolLoan(vars.loanAddress).createLoan(vars.initiator, params.nftAsset, params.nftTokenId, vars.rewardAmount);
+        vars.loanId = ICollateralPoolLoan(vars.loanAddress).createLoan(vars.initiator, params.nftAsset, params.nftTokenId, vars.rewardAmount, 0);
         // Transfer NFT
         IERC721(params.nftAsset).safeTransferFrom(vars.initiator,address(this),params.nftTokenId);
 
@@ -64,5 +72,24 @@ library CollateralizeLogic {
             vars.rewardAmount,
             vars.loanId
         );
+    }
+
+    function executeRepay(
+        ICollateralPoolAddressesProvider addressesProvider,
+        SToken sToken,
+        DataTypes.ExecuteRepayParams memory params
+    ) external {
+        ExecuteRepayLocalVars memory vars;
+        vars.initiator = params.initiator;
+        vars.amount = params.amount + msg.value;
+        vars.loanAddress = addressesProvider.getCollateralPoolLoan();
+        vars.handler = addressesProvider.getCollateralPoolHandler();
+        
+        vars.loanId = ICollateralPoolLoan(vars.loanAddress).getCollateralLoanId(params.nftAsset, params.nftTokenId);
+        require(vars.loanId == 0, "Nft already collateralized");
+
+        ICollateralPoolLoan(vars.loanAddress).updateLoan(vars.initiator, vars.loanId, vars.amount);
+
+        sToken.transferFrom(vars.initiator, address(this), params.amount);
     }
 }
