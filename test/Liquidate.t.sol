@@ -42,14 +42,14 @@ contract LiquidateTest is GeneralSetUp {
         _collateralize();
         _setCollateralAsLiquidatable();
         vm.expectRevert("NFT is not collateral");
-        (bool success, ) = address(collateralPool).call{value : 10 ether}(abi.encodeWithSignature("liquidate(address,uint256)", BAYC, 0));
+        (bool success, ) = address(collateralPool).call{value:10 ether}(abi.encodeWithSignature("liquidate(address,uint256)", BAYC, 0));
         require(success);
     }
 
     function testRevertWithHealthFactor() public {
         _collateralize();
         vm.expectRevert("Liquidation cannot be executed, health factor must be less than 1");
-        (bool success, ) = address(collateralPool).call{value : 10 ether}(abi.encodeWithSignature("liquidate(address,uint256)", BAYC, 7737));
+        (bool success, ) = address(collateralPool).call{value:10 ether}(abi.encodeWithSignature("liquidate(address,uint256)", BAYC, 7737));
         require(success);
     }
 
@@ -57,7 +57,7 @@ contract LiquidateTest is GeneralSetUp {
         _collateralize();
         _setCollateralAsLiquidatable();
         vm.expectRevert("Not enough balance for liquidation");
-        (bool success, ) = address(collateralPool).call{value : 10 ether}(abi.encodeWithSignature("liquidate(address,uint256)", BAYC, 7737));
+        (bool success, ) = address(collateralPool).call{value:10 ether}(abi.encodeWithSignature("liquidate(address,uint256)", BAYC, 7737));
         require(success);
     }
 

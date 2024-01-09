@@ -29,7 +29,7 @@ contract RedeemTest is GeneralSetUp {
         sToken.approve(address(erc721), 10 * 1e18);
         erc721.bid(10 * 1e18);
         sToken.approve(address(collateralPool), 15475733742000000000);
-        (bool success, ) = address(collateralPool).call{value: 10 ether}(abi.encodeWithSignature("redeem(address,uint256)", BAYC, 7737));
+        (bool success, ) = address(collateralPool).call{value:10 ether}(abi.encodeWithSignature("redeem(address,uint256)", BAYC, 7737));
         require(success);
         assertEq(IERC721(BAYC).ownerOf(7737), richer1);
         vm.stopPrank();

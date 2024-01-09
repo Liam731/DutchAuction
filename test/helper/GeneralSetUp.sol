@@ -13,27 +13,28 @@ import {SToken} from "../../contracts/protocol/SToken.sol";
 import {DataTypes} from "../../contracts/libraries/types/DataTypes.sol";
 
 contract GeneralSetUp is Test {
-
     address public constant admin = 0x1D36536728a32B5A9511E20cdc7eBA6DD4e3A253;
     address public constant richer1 = 0xC0cd81fD027282A1113a1c24D6E38A7cEd2a1537;
     address public constant richer2 = 0x5647B3FA9951152EED082969C4677A3B06cdB3a7;
+    address public constant chainlinkOracle = 0xEb1C76Fb7A575D2b2016e99221eB4B0BC43cD3bd;
     address public constant BAYC = 0xE29F8038d1A3445Ab22AD1373c65eC0a6E1161a4;
     address public constant AZUKI = 0x10B8b56D53bFA5e374f38e6C0830BAd4ebeE33E6;
-    address public constant chainlinkOracle = 0xEb1C76Fb7A575D2b2016e99221eB4B0BC43cD3bd;
+    address public constant PriceFeedOfAZUKI = 0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74;
     address public user1;
+
     CollateralPool public collateralPool;
     CollateralPoolLoan public collateralPoolLoan;
     CollateralPoolHandler public handler;
     CollateralPoolAddressesProvider public addressesProvider;
+    NFTOracle public nftOracle;
     PunkWarriorErc721 public erc721;
     SToken public sToken;
+    
     bytes32 public constant NFT_ORACLE = "NFT_ORACLE";
     bytes32 public constant COLLATERAL_POOL = "COLLATERAL_POOL";
     bytes32 public constant COLLATERAL_POOL_LOAN = "COLLATERAL_POOL_LOAN";
     bytes32 public constant COLLATERAL_POOL_HANDLER = "COLLATERAL_POOL_HANDLER";
-
-    NFTOracle public nftOracle;
-
+    
     function setUp() public virtual{
         vm.createSelectFork(vm.envString("GOERLI_RPC_RUL"));
         user1 = makeAddr("User1");

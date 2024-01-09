@@ -43,7 +43,7 @@ library LiquidateLogic {
         address nftOracle;
         address handler;
         uint256 loanId;
-        uint256 currentPrice;
+        uint256 collateralPrice;
         uint256 healthFactor;
         uint256 liquidateRequireAmount;
         uint256 refundAmount;
@@ -59,16 +59,15 @@ library LiquidateLogic {
         vars.initiator = params.initiator;
         vars.sendETHAmount = msg.value;
         vars.poolLoan = addressesProvider.getCollateralPoolLoan();
-
         vars.loanId = ICollateralPoolLoan(vars.poolLoan).getCollateralLoanId(params.nftAsset, params.nftTokenId);
         require(vars.loanId != 0, "NFT is not collateral");
 
         DataTypes.LoanData memory loanData = ICollateralPoolLoan(vars.poolLoan).getLoan(vars.loanId);
         require(loanData.initiator == vars.initiator, "Not NFT owner");
-
         vars.repayAmount = loanData.rewardAmount;
         uint256 initiatorBalance = sToken.balanceOf(vars.initiator);
         require(initiatorBalance + vars.sendETHAmount >= vars.repayAmount, "Not enough balance for redeem");
+
         if(initiatorBalance >= vars.repayAmount) {
             sToken.transferFrom(vars.initiator, address(this), vars.repayAmount);
         } else {
@@ -98,27 +97,25 @@ library LiquidateLogic {
         LiquidateLocalVars memory vars;
         vars.initiator = params.initiator;
         vars.sendETHAmount = msg.value;
-
         vars.nftOracle = addressesProvider.getNftOracle();
         vars.poolLoan = addressesProvider.getCollateralPoolLoan();
         vars.handler = addressesProvider.getCollateralPoolHandler();
-
         uint256 collateralFactor = ICollateralPoolHandler(vars.handler).getCollateralFactor();
         uint256 liquidateFactor = ICollateralPoolHandler(vars.handler).getLiquidateFactor();
         uint256 liquidationIcentive = ICollateralPoolHandler(vars.handler).getLiquidationIncentive();
-
-        vars.currentPrice = uint256(NFTOracle(vars.nftOracle).getLatestPrice());        
+        uint256 currentPrice = uint256(NFTOracle(vars.nftOracle).getLatestPrice());        
 
         vars.loanId = ICollateralPoolLoan(vars.poolLoan).getCollateralLoanId(params.nftAsset, params.nftTokenId);
         require(vars.loanId != 0, "NFT is not collateral");
-
         DataTypes.LoanData memory loanData = ICollateralPoolLoan(vars.poolLoan).getLoan(vars.loanId);
-        vars.healthFactor = vars.currentPrice / (loanData.rewardAmount * liquidateFactor / collateralFactor);
-        require(vars.healthFactor == 0, "Liquidation cannot be executed, health factor must be less than 1");
-        vars.liquidateRequireAmount = vars.currentPrice - (vars.currentPrice * liquidationIcentive / 1e18);
+        vars.collateralPrice = currentPrice + loanData.repayAmount;
+        vars.healthFactor = vars.collateralPrice / (loanData.rewardAmount * liquidateFactor / collateralFactor) * 1e18;
+        require(vars.healthFactor < 1 * 1e18, "Liquidation cannot be executed, health factor must be less than 1");
+        vars.liquidateRequireAmount = vars.collateralPrice * (1e18 - liquidationIcentive) / 1e18;
         require(vars.sendETHAmount >= vars.liquidateRequireAmount, "Not enough balance for liquidation");
         // Refund ETH to the collateralizer
         uint256 collateralizerBalance = sToken.balanceOf(loanData.initiator);
+
         if(loanData.rewardAmount > collateralizerBalance){
             vars.refundAmount = vars.liquidateRequireAmount - (loanData.rewardAmount - collateralizerBalance);
             sToken.burn(loanData.initiator, collateralizerBalance);
@@ -128,6 +125,7 @@ library LiquidateLogic {
         }
         (bool success, ) = (loanData.initiator).call{value: vars.refundAmount}("");
         require(success, "Refund ETH failed");
+
         IERC721(params.nftAsset).safeTransferFrom(address(this), vars.initiator ,params.nftTokenId);
 
         emit Liquidate(

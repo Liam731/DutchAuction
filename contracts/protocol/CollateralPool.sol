@@ -42,7 +42,7 @@ contract CollateralPool is ICollateralPool, CollateralPoolStorage, IERC721Receiv
         );
     }
 
-    function repay(address nftAsset, uint256 nftTokenId, uint256 amount) external payable override {
+    function repay(address nftAsset, uint256 nftTokenId, uint256 repayAmount) external payable override {
         CollateralizeLogic.executeRepay(
             _addressesProvider,
             _sToken,
@@ -50,7 +50,7 @@ contract CollateralPool is ICollateralPool, CollateralPoolStorage, IERC721Receiv
                 initiator: msg.sender,
                 nftAsset: nftAsset,
                 nftTokenId: nftTokenId,
-                amount: amount
+                repayAmount: repayAmount
             })
         );
     }

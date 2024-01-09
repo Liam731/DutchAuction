@@ -16,11 +16,6 @@ contract CollaterlizeTest is GeneralSetUp {
         IERC721(BAYC).approve(address(collateralPool), 7737);
         collateralPool.collateralize(BAYC, 7737);
         vm.stopPrank();
-
-        vm.startPrank(richer2);
-        IERC721(BAYC).approve(address(collateralPool), 5904);
-        collateralPool.collateralize(BAYC, 5904);
-        vm.stopPrank();
         
         _checkCreateLoan();
     }
@@ -35,22 +30,24 @@ contract CollaterlizeTest is GeneralSetUp {
 
     function testRevertWithAlreadyCollateralize() public {
         vm.startPrank(richer1);
+        IERC721(BAYC).approve(address(collateralPool), 7737);
         collateralPool.collateralize(BAYC, 7737);
-        vm.expectRevert("Nft already collateralized");
+        vm.expectRevert("NFT already collateralized");
         collateralPool.collateralize(BAYC, 7737);
         vm.stopPrank();
     }
 
     function _checkCreateLoan() internal {
-        uint256 loanId1 = collateralPoolLoan.getCollateralLoanId(BAYC, 7737);
-        DataTypes.LoanData memory loanData = collateralPoolLoan.getLoan(loanId1);
+        uint256 loanId = collateralPoolLoan.getCollateralLoanId(BAYC, 7737);
+        DataTypes.LoanData memory loanData = collateralPoolLoan.getLoan(loanId);
         uint256 currentPrice = uint256(nftOracle.getLatestPrice());
         uint256 collateralFactor = handler.getCollateralFactor();
 
-        assertEq(loanId1, 1);
+        assertEq(loanId, 1);
         assertEq(loanData.initiator, richer1);
         assertEq(loanData.nftAsset, BAYC);
         assertEq(loanData.nftTokenId, 7737);
         assertEq(loanData.rewardAmount, currentPrice * collateralFactor / 1e18);
+        assertEq(sToken.balanceOf(richer1), loanData.rewardAmount);
     }
 }

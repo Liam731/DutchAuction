@@ -38,14 +38,14 @@ contract CollateralPoolTest is GeneralSetUp {
         vm.stopPrank();
     }
 
-    function testInitializeWithPool() public {
+    function testInitializeWithCollateralPool() public {
         vm.startPrank(admin);
         collateralPool = new CollateralPool();
         collateralPool.initialize(ICollateralPoolAddressesProvider(addressesProvider), sToken);
         vm.stopPrank();
     }
 
-    function testInitializeWithPoolLoan() public {
+    function testInitializeWithCollateralPoolLoan() public {
         vm.startPrank(admin);
         collateralPoolLoan = new CollateralPoolLoan();
         collateralPoolLoan.initialize(ICollateralPoolAddressesProvider(addressesProvider));
@@ -56,13 +56,9 @@ contract CollateralPoolTest is GeneralSetUp {
         vm.startPrank(admin);      
         NFTOracle oracle = new NFTOracle();  
         //Set Azuki NFT address
-        oracle.setNftAddress(0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74);
-        int AzukiPrice = oracle.getLatestPrice();
-        console.logInt(AzukiPrice);
-        vm.stopPrank();
-        vm.startPrank(user1);
-        vm.expectRevert("Only admin can change NFT address");
-        oracle.setNftAddress(0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74);
+        oracle.setNftAddress(PriceFeedOfAZUKI);
+        int azukiPrice = oracle.getLatestPrice();
+        assertGt(azukiPrice, 0);
         vm.stopPrank();
     }
 
@@ -86,6 +82,16 @@ contract CollateralPoolTest is GeneralSetUp {
         collateralPool.removeFromWhitelist(user1);
         bool isWhitelisted = collateralPool.isWhitelisted(user1);
         assertEq(isWhitelisted, false);
+        vm.stopPrank();
+    }
+
+    function testRevertWithNotOracleAdmin() public {
+        vm.startPrank(admin);
+        NFTOracle oracle = new NFTOracle();
+        vm.stopPrank(); 
+        vm.startPrank(user1);
+        vm.expectRevert("Only admin can change NFT address");
+        oracle.setNftAddress(PriceFeedOfAZUKI);
         vm.stopPrank();
     }
 
