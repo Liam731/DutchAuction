@@ -1,4 +1,4 @@
-# Dauth Action With NFT Lending
+# Dutch Action With NFT Lending
 This repository contains the smart contracts source code and NFT Lending mechanism for Dauth Action. The repository uses foundry as development environment for compilation, testing and deployment tasks.
 
 ## Setup
