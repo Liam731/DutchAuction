@@ -15,8 +15,8 @@ contract RepayTest is GeneralSetUp {
         vm.startPrank(richer1);
         IERC721(BAYC).approve(address(collateralPool), 7737);
         collateralPool.collateralize(BAYC, 7737);
-        sToken.approve(address(collateralPool), 15 * 1e18);
-        (bool success, ) = address(collateralPool).call{value:10 ether}(abi.encodeWithSignature("repay(address,uint256,uint256)", BAYC, 7737, 15 * 1e18));
+        sToken.approve(address(collateralPool), 10 * 1e18);
+        (bool success, ) = address(collateralPool).call{value:10 ether}(abi.encodeWithSignature("repay(address,uint256,uint256)", BAYC, 7737, 10 * 1e18));
         require(success);
         vm.stopPrank();
         
@@ -50,6 +50,6 @@ contract RepayTest is GeneralSetUp {
 
         assertEq(loanId1, 1);
         assertEq(loanData.initiator, richer1);
-        assertEq(loanData.repayAmount, 25 * 1e18);
+        assertEq(loanData.repayAmount, 20 * 1e18);
     }
 }
