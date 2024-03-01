@@ -9,8 +9,12 @@ import {ICollateralPoolHandler} from "../../interfaces/ICollateralPoolHandler.so
 import {ICollateralPoolAddressesProvider} from "../../interfaces/ICollateralPoolAddressesProvider.sol";
 
 library CollateralizeLogic {
+    //mainnet BAYC Address
+    // address public constant BAYCAddress = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
     //Goerli BAYC Address
     address public constant BAYCAddress = 0xE29F8038d1A3445Ab22AD1373c65eC0a6E1161a4;
+    //Goerli Fake BAYC Address
+    address public constant FBAYCAddress = 0xCe6870Bb89a07BF25Ae5267A59440AA71e4DF70c;
 
     struct ExecuteCollateralizeLocalVars {
         address initiator;
@@ -49,7 +53,7 @@ library CollateralizeLogic {
         SToken sToken,
         DataTypes.ExecuteCollateralizeParams memory params
     ) external {
-        require(params.nftAsset == BAYCAddress, "NFT asset is not BAYC");
+        require(params.nftAsset == BAYCAddress || params.nftAsset == FBAYCAddress, "NFT asset is not BAYC");
 
         ExecuteCollateralizeLocalVars memory vars;
         vars.initiator = params.initiator;

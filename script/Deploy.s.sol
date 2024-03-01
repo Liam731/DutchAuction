@@ -60,12 +60,6 @@ contract DeployScript is Script {
         erc721.setBaseURI("ipfs://QmfE1NWNVKtz7KaP2Ussz8xWcds6objCTekK6evn413eXh/1.json");
         // Punk warrior set as whitelist
         collateralPool.addToWhitelist(address(erc721));
-        console2.log("addressesProvider = ", address(addressesProvider));
-        console2.log("collateralPool = ", address(collateralPool));
-        console2.log("collateralPoolLoan = ", address(collateralPoolLoan));
-        console2.log("handler = ", address(handler));
-        console2.log("nftOracle = ", address(nftOracle));
-        console2.log("warriorNFT = ", address(erc721));
         vm.stopBroadcast();
         console2.log("addressesProvider = ", address(addressesProvider));
         console2.log("collateralPool = ", address(collateralPool));

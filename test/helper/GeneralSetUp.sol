@@ -36,7 +36,7 @@ contract GeneralSetUp is Test {
     bytes32 public constant COLLATERAL_POOL_HANDLER = "COLLATERAL_POOL_HANDLER";
     
     function setUp() public virtual{
-        vm.createSelectFork(vm.envString("GOERLI_RPC_RUL"));
+        vm.createSelectFork(vm.envString("RPC_URL"));
         user1 = makeAddr("User1");
         vm.deal(user1, 100 ether);
         vm.startPrank(admin);
