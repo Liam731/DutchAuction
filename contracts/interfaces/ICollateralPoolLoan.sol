@@ -13,7 +13,13 @@ interface ICollateralPoolLoan {
 
     function updateLoan(address initiator, uint256 loanId, uint256 repayAmount) external returns(uint256);
 
+    function deleteLoan(address initiator, address nftAsset, uint256 nftTokenId) external;
+
     function getCollateralLoanId(address nftAsset, uint256 nftTokenId) external view returns(uint256);
 
     function getLoan(uint256 loanId) external view returns(DataTypes.LoanData memory);
+
+    function getPersonalLoanTokenList(address account) external view returns(uint256[] memory);
+
+    function getNftAssetHealthFactor(address nftAsset, uint256 nftTokenId) external view returns(uint256);
 }

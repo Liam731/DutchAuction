@@ -14,7 +14,7 @@ library CollateralizeLogic {
     //Goerli BAYC Address
     address public constant BAYCAddress = 0xE29F8038d1A3445Ab22AD1373c65eC0a6E1161a4;
     //Goerli Fake BAYC Address
-    address public constant FBAYCAddress = 0xCe6870Bb89a07BF25Ae5267A59440AA71e4DF70c;
+    address public constant FBAYCAddress = 0xcAB8afbd379228E7F0Fd1e48C5040d4c9fECd245;
 
     struct ExecuteCollateralizeLocalVars {
         address initiator;

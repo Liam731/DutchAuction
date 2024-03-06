@@ -9,7 +9,7 @@ contract DutchAuction {
     uint256 public auctionIndex; // Which auction round
     uint256 public bidIndex;
     uint256 public refundProgress;
-    address public auctioner;
+    address public auctioneer;
     mapping(uint256 => Auctions) public auctionData;
     mapping(uint256 => mapping(uint256 => Bids)) public allBids;
     bool internal _initialized;
@@ -45,15 +45,15 @@ contract DutchAuction {
     }
 
     constructor() {
-        auctioner = msg.sender;
+        auctioneer = msg.sender;
     }
 
-    modifier onlyAuctioner() {
-        require(msg.sender == auctioner, "Only auctioner can call this function");
+    modifier onlyAuctioneer() {
+        require(msg.sender == auctioneer, "Only auctioneer can call this function");
         _;
     }
 
-    function initialize(ICollateralPoolAddressesProvider provider,SToken sToken) external onlyAuctioner {
+    function initialize(ICollateralPoolAddressesProvider provider,SToken sToken) external onlyAuctioneer {
         require(!_initialized, "Already initialized");
         _addressesProvider = provider;
         _sToken = sToken;
@@ -69,7 +69,7 @@ contract DutchAuction {
         uint256 _endPrice,
         uint256 _priceStep,
         uint256 _totalForAuction
-    ) external onlyAuctioner {
+    ) external onlyAuctioneer {
         require(!auctionData[auctionIndex].isAuctionActivated,"Auction still in progress");
         require(auctionData[auctionIndex].isAllRefunded,"Auction not refunded yet");
         auctionIndex++;
@@ -148,13 +148,22 @@ contract DutchAuction {
         }
     }
 
-    function withdraw(uint256 amount, address to) external onlyAuctioner {
+    function withdraw(uint256 amount, address to) external onlyAuctioneer {
         require(!auctionData[auctionIndex].isAuctionActivated,"Auction still in progress");
         require(to != address(0), "Recipient is the zero address");
         address collateralPool = _addressesProvider.getCollateralPool();
         ICollateralPool(collateralPool).swapExactTokensForETH(amount);
         (bool success, ) = to.call{value: amount}("");
         require(success, "Transfer ETH failed");
+    }
+
+    function EmergencyWithdrawETH() external onlyAuctioneer {
+        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+        require(success, "Transfer ETH failed");
+    }
+
+    function terminateAuction() external onlyAuctioneer {
+        auctionData[auctionIndex].isAuctionActivated = false;
     }
 
     function setActionDeactivated() external {

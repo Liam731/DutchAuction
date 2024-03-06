@@ -64,18 +64,13 @@ library LiquidateLogic {
 
         DataTypes.LoanData memory loanData = ICollateralPoolLoan(vars.poolLoan).getLoan(vars.loanId);
         require(loanData.initiator == vars.initiator, "Not NFT owner");
-        vars.repayAmount = loanData.rewardAmount;
-        uint256 initiatorBalance = sToken.balanceOf(vars.initiator);
-        require(initiatorBalance + vars.sendETHAmount >= vars.repayAmount, "Not enough balance for redeem");
+        require(sToken.balanceOf(vars.initiator) + vars.sendETHAmount >= loanData.rewardAmount, "Not enough balance for redeem");
 
-        if(initiatorBalance >= vars.repayAmount) {
-            sToken.transferFrom(vars.initiator, address(this), vars.repayAmount);
-        } else {
-            vars.repayAmount = initiatorBalance;
-            sToken.transferFrom(vars.initiator, address(this), vars.repayAmount);
-        }
-        
+        vars.repayAmount = loanData.rewardAmount - vars.sendETHAmount;
+
+        sToken.transferFrom(vars.initiator, address(this), vars.repayAmount);    
         IERC721(params.nftAsset).safeTransferFrom(address(this), vars.initiator ,params.nftTokenId);
+        ICollateralPoolLoan(vars.poolLoan).deleteLoan(vars.initiator, params.nftAsset, params.nftTokenId);
 
         emit Redeem(
             vars.initiator,
@@ -127,6 +122,7 @@ library LiquidateLogic {
         require(success, "Refund ETH failed");
 
         IERC721(params.nftAsset).safeTransferFrom(address(this), vars.initiator ,params.nftTokenId);
+        ICollateralPoolLoan(vars.poolLoan).deleteLoan(vars.initiator, params.nftAsset, params.nftTokenId);
 
         emit Liquidate(
             vars.initiator,

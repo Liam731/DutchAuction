@@ -70,8 +70,6 @@ contract GeneralSetUp is Test {
         erc721 = new PunkWarriorErc721();
         erc721.initialize(ICollateralPoolAddressesProvider(addressesProvider), sToken);
         erc721.setBaseURI("ipfs://QmfE1NWNVKtz7KaP2Ussz8xWcds6objCTekK6evn413eXh/1.json");
-        // Punk warrior set as whitelist
-        collateralPool.addToWhitelist(address(erc721));
         vm.stopPrank();
     }
 

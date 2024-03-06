@@ -2,11 +2,14 @@
 pragma solidity ^0.8.19;
 import {ICollateralPool} from "../interfaces/ICollateralPool.sol";
 import {ICollateralPoolLoan} from "../interfaces/ICollateralPoolLoan.sol";
+import {ICollateralPoolHandler} from "../interfaces/ICollateralPoolHandler.sol";
 import {ICollateralPoolAddressesProvider} from "../interfaces/ICollateralPoolAddressesProvider.sol";
+import {NFTOracle} from "./NFTOracle.sol";
 import {DataTypes} from "../libraries/types/DataTypes.sol";
 
 contract CollateralPoolLoan is ICollateralPoolLoan {
     uint256 private _loanId;
+    mapping(address => uint256[]) private _loanTokenList;
     mapping(uint256 => DataTypes.LoanData) private _loanIds;
     mapping(address => mapping(uint256 => uint256)) private _nftToLoanIds;
     bool private _initialized;
@@ -36,6 +39,7 @@ contract CollateralPoolLoan is ICollateralPoolLoan {
         loanData.rewardAmount = rewardAmount;
         loanData.repayAmount = repayAmount;
 
+        _loanTokenList[initiator].push(nftTokenId);
         emit LoanCreated(initiator, _loanId, nftAsset, nftTokenId, rewardAmount);
 
         return _loanId;
@@ -50,12 +54,45 @@ contract CollateralPoolLoan is ICollateralPoolLoan {
         return loanId;
     }
 
-    function getCollateralLoanId(address nftAsset, uint256 nftTokenId) external view override returns(uint256) {
+    function deleteLoan(address initiator, address nftAsset, uint256 nftTokenId) external override {
+        // Initialize asset loan
+        _nftToLoanIds[nftAsset][nftTokenId] = 0; 
+        uint256[] storage tokens = _loanTokenList[initiator];
+        for (uint256 i = 0; i < tokens.length; i++) {
+            if (tokens[i] == nftTokenId) {
+                tokens[i] = tokens[tokens.length - 1];
+                tokens.pop();
+                break;
+            }
+        }
+    }
+
+    function getCollateralLoanId(address nftAsset, uint256 nftTokenId) public view override returns(uint256) {
         return _nftToLoanIds[nftAsset][nftTokenId];
     }
 
-    function getLoan(uint256 loanId) external view override returns(DataTypes.LoanData memory) {
+    function getLoan(uint256 loanId) public view override returns(DataTypes.LoanData memory) {
         return _loanIds[loanId];
+    }
+
+    function getPersonalLoanTokenList(address account) external view override returns(uint256[] memory) {
+        return _loanTokenList[account];
+    }
+
+    function getNftAssetHealthFactor(address nftAsset, uint256 nftTokenId) external view override returns(uint256) {
+        uint256 loanId = getCollateralLoanId(nftAsset, nftTokenId);
+        require(loanId != 0, "NFT is not collateral");
+        address nftOracle = _addressesProvider.getNftOracle();
+        address handler = _addressesProvider.getCollateralPoolHandler();
+        uint256 collateralFactor = ICollateralPoolHandler(handler).getCollateralFactor();
+        uint256 liquidateFactor = ICollateralPoolHandler(handler).getLiquidateFactor();
+        
+        uint256 currentPrice = uint256(NFTOracle(nftOracle).getLatestPrice());        
+        DataTypes.LoanData memory loanData = getLoan(loanId);
+        uint256 collateralPrice = currentPrice + loanData.repayAmount;
+
+        uint256 healthFactor = collateralPrice / (loanData.rewardAmount * liquidateFactor / collateralFactor) * 1e18;
+        return healthFactor;
     }
 
     function _getCollateralPool() internal view returns(ICollateralPool) {

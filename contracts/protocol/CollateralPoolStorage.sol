@@ -5,7 +5,6 @@ import {SToken} from "./SToken.sol";
 
 contract CollateralPoolStorage {
     address internal _admin;
-    mapping(address => bool) internal _whitelist;
     /**
      * @dev Guard variable for re-entrancy checks
      */

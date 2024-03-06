@@ -81,7 +81,6 @@ contract CollateralPool is ICollateralPool, CollateralPoolStorage, IERC721Receiv
     }
 
     function swapExactTokensForETH(uint256 amountIn) external override {
-        require(isWhitelisted(msg.sender), "Not in whitelist");
         SwapTokensLogic.executeSwap(
             _sToken,
             DataTypes.ExecuteSwapParams({
@@ -89,19 +88,6 @@ contract CollateralPool is ICollateralPool, CollateralPoolStorage, IERC721Receiv
                 amountIn: amountIn
             })
         );
-
-    }
-
-    function addToWhitelist(address actionAddress) external onlyAdmin {
-        _whitelist[actionAddress] = true;
-    }
-
-    function removeFromWhitelist(address actionAddress) external onlyAdmin {
-        _whitelist[actionAddress] = false;
-    }
-
-    function isWhitelisted(address actionAddress) public view returns (bool) {
-        return _whitelist[actionAddress];
     }
 
     function onERC721Received(
