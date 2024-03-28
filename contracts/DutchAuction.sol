@@ -8,6 +8,7 @@ import {ICollateralPoolAddressesProvider} from "./interfaces/ICollateralPoolAddr
 contract DutchAuction {
     uint256 public auctionIndex; // Which auction round
     uint256 public bidIndex;
+    uint256 public totalItemIndex;
     uint256 public refundProgress;
     address public auctioneer;
     mapping(uint256 => Auctions) public auctionData;
@@ -73,8 +74,8 @@ contract DutchAuction {
         require(!auctionData[auctionIndex].isAuctionActivated,"Auction still in progress");
         require(auctionData[auctionIndex].isAllRefunded,"Auction not refunded yet");
         auctionIndex++;
-        auctionData[auctionIndex].startTime = _startTime; // Start time
-        auctionData[auctionIndex].endTime = _endTime; // End time
+        auctionData[auctionIndex].startTime = _startTime + block.timestamp; // Start time
+        auctionData[auctionIndex].endTime = _endTime + block.timestamp; // End time
         auctionData[auctionIndex].timeStep = _timeStep; // Duration between deductions
         auctionData[auctionIndex].startPrice = _startPrice; // Initial price
         auctionData[auctionIndex].endPrice = _endPrice; // Final price
@@ -91,11 +92,12 @@ contract DutchAuction {
 
         _sToken.transferFrom(msg.sender, address(this), bidPrice);
         currentbids.bidder = msg.sender;
-        currentbids.itemIndex = currentAuction.totalBids;
+        currentbids.itemIndex = totalItemIndex;
         currentbids.bidPrice = bidPrice;
         currentbids.finalProcess = 1;
         currentAuction.lastBidPrice = bidPrice;
         currentAuction.totalBids++;
+        totalItemIndex++;
 
         emit Bid(
             currentbids.bidder,
@@ -163,7 +165,7 @@ contract DutchAuction {
     }
 
     function terminateAuction() external onlyAuctioneer {
-        auctionData[auctionIndex].isAuctionActivated = false;
+        auctionData[auctionIndex].endTime = block.timestamp;
     }
 
     function setActionDeactivated() external {
@@ -173,6 +175,10 @@ contract DutchAuction {
 
     function getPersonalBidData(uint256 _auctionIndex, uint256 _itemIndex) external view returns (Bids memory) {
         return allBids[_auctionIndex][_itemIndex];
+    }
+
+    function getAuctionData(uint256 _auctionIndex) external view returns (Auctions memory) {
+        return auctionData[_auctionIndex];
     }
 
     receive() external payable {}
@@ -186,7 +192,7 @@ contract DutchAuction {
         uint256 step = (block.timestamp - currentAuction.startTime) /
             currentAuction.timeStep;
         return
-            currentAuction.startPrice > step * currentAuction.priceStep
+            currentAuction.startPrice - currentAuction.endPrice > step * currentAuction.priceStep
                 ? currentAuction.startPrice - step * currentAuction.priceStep
                 : currentAuction.endPrice;
     }

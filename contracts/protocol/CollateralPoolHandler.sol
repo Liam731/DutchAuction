@@ -7,6 +7,7 @@ contract CollateralPoolHandler is ICollateralPoolHandler {
     uint256 public collateralFactorMantissa;
     uint256 public liquidateFactorMantissa;
     uint256 public liquidationIncentiveMantissa;
+    mapping(address => bool) public _isBlueChipNFTs;
 
     /// @notice Emitted when a collateral factor is changed by admin
     event NewCollateralFactor(uint oldCollateralFactorMantissa, uint newCollateralFactorMantissa);
@@ -26,17 +27,6 @@ contract CollateralPoolHandler is ICollateralPoolHandler {
         _;
     }
 
-    function getCollateralFactor() external view returns (uint256) {
-        return collateralFactorMantissa;
-    }
-
-    function getLiquidateFactor() external view returns (uint256) {
-        return liquidateFactorMantissa;
-    }
-
-    function getLiquidationIncentive() external view returns (uint256) {
-        return liquidationIncentiveMantissa;
-    }
 
     function setCollateralFactor(uint256 newCollateralFactorMantissa) external override onlyAdmin returns (bool) {
         // Save current value for use in log
@@ -76,4 +66,26 @@ contract CollateralPoolHandler is ICollateralPoolHandler {
 
         return true;
     }
+
+    function setBlueChipNFT(address nftAsset) external override onlyAdmin returns(bool) {
+        _isBlueChipNFTs[nftAsset] = true;
+        return true;
+    }
+
+    function isBlueChipNFT(address nftAsset) external view override returns(bool) {
+        return _isBlueChipNFTs[nftAsset];
+    }
+
+    function getCollateralFactor() external view returns (uint256) {
+        return collateralFactorMantissa;
+    }
+
+    function getLiquidateFactor() external view returns (uint256) {
+        return liquidateFactorMantissa;
+    }
+
+    function getLiquidationIncentive() external view returns (uint256) {
+        return liquidationIncentiveMantissa;
+    }
+
 }

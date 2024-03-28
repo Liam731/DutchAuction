@@ -9,12 +9,12 @@ import {ICollateralPoolHandler} from "../../interfaces/ICollateralPoolHandler.so
 import {ICollateralPoolAddressesProvider} from "../../interfaces/ICollateralPoolAddressesProvider.sol";
 
 library CollateralizeLogic {
-    //mainnet BAYC Address
-    // address public constant BAYCAddress = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
-    //Goerli BAYC Address
-    address public constant BAYCAddress = 0xE29F8038d1A3445Ab22AD1373c65eC0a6E1161a4;
-    //Goerli Fake BAYC Address
-    address public constant FBAYCAddress = 0xcAB8afbd379228E7F0Fd1e48C5040d4c9fECd245;
+    // mainnet BAYC Address
+    address public constant BAYCAddress = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
+    // Sepolia BAYC Address
+    address public constant SBAYCAddress = 0xaa6f57b90099f5fC8D30CE44f451E2d00548bcB3;
+    // Holesky Fake BAYC Address
+    address public constant HBAYCAddress = 0xBf1265D530c15542Cd9804cd8EB47a4C2e2C00f2;
 
     struct ExecuteCollateralizeLocalVars {
         address initiator;
@@ -53,14 +53,14 @@ library CollateralizeLogic {
         SToken sToken,
         DataTypes.ExecuteCollateralizeParams memory params
     ) external {
-        require(params.nftAsset == BAYCAddress || params.nftAsset == FBAYCAddress, "NFT asset is not BAYC");
-
         ExecuteCollateralizeLocalVars memory vars;
         vars.initiator = params.initiator;
         vars.loanAddress = addressesProvider.getCollateralPoolLoan();
         vars.handler = addressesProvider.getCollateralPoolHandler();
         vars.nftOracle = addressesProvider.getNftOracle();
         vars.loanId = ICollateralPoolLoan(vars.loanAddress).getCollateralLoanId(params.nftAsset, params.nftTokenId);
+
+        require(ICollateralPoolHandler(vars.handler).isBlueChipNFT(params.nftAsset), "Not Blue chip NFT asset");
         require(vars.loanId == 0, "NFT already collateralized");
 
         vars.currentPrice = uint256(NFTOracle(vars.nftOracle).getLatestPrice());     

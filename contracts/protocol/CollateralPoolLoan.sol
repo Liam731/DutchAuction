@@ -84,14 +84,14 @@ contract CollateralPoolLoan is ICollateralPoolLoan {
         require(loanId != 0, "NFT is not collateral");
         address nftOracle = _addressesProvider.getNftOracle();
         address handler = _addressesProvider.getCollateralPoolHandler();
-        uint256 collateralFactor = ICollateralPoolHandler(handler).getCollateralFactor();
         uint256 liquidateFactor = ICollateralPoolHandler(handler).getLiquidateFactor();
-        
+
         uint256 currentPrice = uint256(NFTOracle(nftOracle).getLatestPrice());        
         DataTypes.LoanData memory loanData = getLoan(loanId);
-        uint256 collateralPrice = currentPrice + loanData.repayAmount;
+        uint256 liquidationThreshole = currentPrice + loanData.repayAmount;
 
-        uint256 healthFactor = collateralPrice / (loanData.rewardAmount * liquidateFactor / collateralFactor) * 1e18;
+        uint256 healthFactor = (liquidationThreshole * liquidateFactor)  / loanData.rewardAmount;
+
         return healthFactor;
     }
 

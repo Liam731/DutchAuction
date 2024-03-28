@@ -11,7 +11,13 @@ import {CollateralPoolAddressesProvider,ICollateralPoolAddressesProvider} from "
 import {SToken} from "../contracts/protocol/SToken.sol";
 
 contract DeployScript is Script {
-    address public constant chainlinkOracle = 0xEb1C76Fb7A575D2b2016e99221eB4B0BC43cD3bd;
+    address public constant chainlinkOracle = 0xDDEE92376670680c12B3Cd1cb274d32A77E1Ff00;
+    // mainnet BAYC Address
+    address public constant BAYCAddress = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
+    // Sepolia BAYC Address
+    address public constant SBAYCAddress = 0xaa6f57b90099f5fC8D30CE44f451E2d00548bcB3;
+    // Holesky Fake BAYC Address
+    address public constant HBAYCAddress = 0xE6A90F7A38c1Bc480Ff5112781e209C060650314;
     
     CollateralPool public collateralPool;
     CollateralPoolLoan public collateralPoolLoan;
@@ -41,12 +47,17 @@ contract DeployScript is Script {
         collateralPoolLoan.initialize(ICollateralPoolAddressesProvider(addressesProvider));
         // Deploy collateral pool handler
         handler = new CollateralPoolHandler();
-        // Set collateral factor = 60%
-        ICollateralPoolHandler(handler).setCollateralFactor(60 * 1e16);
-        // Set liquidate factor = 75%
-        ICollateralPoolHandler(handler).setLiquidateFactor(75 * 1e16);
+        // Set collateral factor = 50%
+        ICollateralPoolHandler(handler).setCollateralFactor(50 * 1e16);
+        // Set liquidate factor = 50%
+        ICollateralPoolHandler(handler).setLiquidateFactor(70 * 1e16);
         // Set liquidation incentive = 10%
         ICollateralPoolHandler(handler).setLiquidationIncentive(10 * 1e16);
+        // Set blue chip NFT
+        ICollateralPoolHandler(handler).setBlueChipNFT(BAYCAddress);
+        ICollateralPoolHandler(handler).setBlueChipNFT(SBAYCAddress);
+        ICollateralPoolHandler(handler).setBlueChipNFT(HBAYCAddress);
+        
         // Deploy NFTOracle
         nftOracle = NFTOracle(chainlinkOracle);
         // Set collateral pool addresses

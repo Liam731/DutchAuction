@@ -95,22 +95,18 @@ library LiquidateLogic {
         vars.nftOracle = addressesProvider.getNftOracle();
         vars.poolLoan = addressesProvider.getCollateralPoolLoan();
         vars.handler = addressesProvider.getCollateralPoolHandler();
-        uint256 collateralFactor = ICollateralPoolHandler(vars.handler).getCollateralFactor();
-        uint256 liquidateFactor = ICollateralPoolHandler(vars.handler).getLiquidateFactor();
-        uint256 liquidationIcentive = ICollateralPoolHandler(vars.handler).getLiquidationIncentive();
-        uint256 currentPrice = uint256(NFTOracle(vars.nftOracle).getLatestPrice());        
-
         vars.loanId = ICollateralPoolLoan(vars.poolLoan).getCollateralLoanId(params.nftAsset, params.nftTokenId);
-        require(vars.loanId != 0, "NFT is not collateral");
+        vars.healthFactor = ICollateralPoolLoan(vars.poolLoan).getNftAssetHealthFactor(params.nftAsset, params.nftTokenId);
         DataTypes.LoanData memory loanData = ICollateralPoolLoan(vars.poolLoan).getLoan(vars.loanId);
-        vars.collateralPrice = currentPrice + loanData.repayAmount;
-        vars.healthFactor = vars.collateralPrice / (loanData.rewardAmount * liquidateFactor / collateralFactor) * 1e18;
-        require(vars.healthFactor < 1 * 1e18, "Liquidation cannot be executed, health factor must be less than 1");
-        vars.liquidateRequireAmount = vars.collateralPrice * (1e18 - liquidationIcentive) / 1e18;
-        require(vars.sendETHAmount >= vars.liquidateRequireAmount, "Not enough balance for liquidation");
-        // Refund ETH to the collateralizer
+        uint256 liquidationIcentive = ICollateralPoolHandler(vars.handler).getLiquidationIncentive();     
+        vars.liquidateRequireAmount = vars.collateralPrice * (1e18 - liquidationIcentive) / 1e18; 
         uint256 collateralizerBalance = sToken.balanceOf(loanData.initiator);
 
+        require(vars.loanId != 0, "NFT is not collateral");
+        require(vars.healthFactor < 1 * 1e18, "Liquidation cannot be executed, health factor must be less than 1");
+        require(vars.sendETHAmount >= vars.liquidateRequireAmount, "Not enough balance for liquidation");
+
+        // Refund ETH to the collateralizer
         if(loanData.rewardAmount > collateralizerBalance){
             vars.refundAmount = vars.liquidateRequireAmount - (loanData.rewardAmount - collateralizerBalance);
             sToken.burn(loanData.initiator, collateralizerBalance);
