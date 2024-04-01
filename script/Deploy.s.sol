@@ -17,7 +17,7 @@ contract DeployScript is Script {
     // Sepolia BAYC Address
     address public constant SBAYCAddress = 0xaa6f57b90099f5fC8D30CE44f451E2d00548bcB3;
     // Holesky Fake BAYC Address
-    address public constant HBAYCAddress = 0xE6A90F7A38c1Bc480Ff5112781e209C060650314;
+    address public constant HBAYCAddress = 0xa2f512Fb2c1477B37728771c2505E83a1f3a289A;
     
     CollateralPool public collateralPool;
     CollateralPoolLoan public collateralPoolLoan;
@@ -70,6 +70,7 @@ contract DeployScript is Script {
         erc721.initialize(ICollateralPoolAddressesProvider(addressesProvider), sToken);
         erc721.setBaseURI("ipfs://QmfE1NWNVKtz7KaP2Ussz8xWcds6objCTekK6evn413eXh/1.json");
         vm.stopBroadcast();
+        console2.log("HBAYCAddress = ", address(HBAYCAddress));
         console2.log("addressesProvider = ", address(addressesProvider));
         console2.log("collateralPool = ", address(collateralPool));
         console2.log("collateralPoolLoan = ", address(collateralPoolLoan));

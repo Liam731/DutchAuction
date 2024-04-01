@@ -9,12 +9,7 @@ import {ICollateralPoolHandler} from "../../interfaces/ICollateralPoolHandler.so
 import {ICollateralPoolAddressesProvider} from "../../interfaces/ICollateralPoolAddressesProvider.sol";
 
 library CollateralizeLogic {
-    // mainnet BAYC Address
-    address public constant BAYCAddress = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
-    // Sepolia BAYC Address
-    address public constant SBAYCAddress = 0xaa6f57b90099f5fC8D30CE44f451E2d00548bcB3;
-    // Holesky Fake BAYC Address
-    address public constant HBAYCAddress = 0xBf1265D530c15542Cd9804cd8EB47a4C2e2C00f2;
+
 
     struct ExecuteCollateralizeLocalVars {
         address initiator;
